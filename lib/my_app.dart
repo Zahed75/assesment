@@ -2,7 +2,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:assesment/core/theme/theme.dart';
-import 'package:assesment/core/theme/theme_controller.dart';
+import 'package:assesment/core/theme/theme_notifier.dart';
 import 'package:assesment/features/onBoarding/onBoarding.dart';
 import 'package:assesment/features/sigin/signin.dart';
 import 'package:flutter/material.dart';

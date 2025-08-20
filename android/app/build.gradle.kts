@@ -14,7 +14,7 @@ android {
     ndkVersion = "28.1.13356709"
 
     defaultConfig {
-        applicationId = "com.shwapno.survey2"
+        applicationId = "com.example.assesment"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -89,3 +89,5 @@ flutter {
 tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.add("-Xlint:-options")
 }
+
+

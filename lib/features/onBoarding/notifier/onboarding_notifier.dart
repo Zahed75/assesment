@@ -1,8 +1,11 @@
 // lib/features/authentication/notifiers/onboarding/onboarding_notifier.dart
+
+import 'package:assesment/app/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'onboarding_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:go_router/go_router.dart'; // Import GoRouter for navigation
 
 class OnboardingNotifier extends StateNotifier<OnboardingState> {
   OnboardingNotifier() : super(OnboardingState());
@@ -21,13 +24,13 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
   }
 
   // Move to the next page
-  Future<void> nextPage() async {
+  Future<void> nextPage(BuildContext context) async {
     if (state.currentIndex == 2) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('onboardingSeen', true); // Save the onboarding state
-      // Navigate to the login screen
-      // We can use the router system from your app for navigation instead of `Get.offAll`
-      // Assuming you have GoRouter, Navigator or similar in place
+
+      // Navigate to the login screen when Get Started is clicked
+      context.go(Routes.signIn); // Navigate to the login screen
     } else {
       state = state.copyWith(currentIndex: state.currentIndex + 1);
       pageController.jumpToPage(state.currentIndex);
