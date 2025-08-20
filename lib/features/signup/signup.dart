@@ -1,0 +1,36 @@
+import 'package:assesment/common_ui/styles/padding.dart';
+import 'package:assesment/features/signup/widgets/signup_form.dart';
+import 'package:assesment/utils/constants/sizes.dart';
+import 'package:assesment/utils/constants/texts.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class SignUpScreen extends ConsumerWidget {
+  const SignUpScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: UPadding.screenPadding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ///-----[Header]---///
+              Text(
+                UTexts.signupTitle,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              SizedBox(height: USizes.spaceBtwSections),
+
+              ///-----[Form]---///
+              USignupForm(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
