@@ -1,5 +1,6 @@
-// lib/navigation_menu.dart
-
+import 'package:assesment/app/router/routes.dart';
+import 'package:assesment/features/dashboard/coming_soon.dart';
+import 'package:assesment/features/home/home.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,17 +45,17 @@ class NavigationMenu extends ConsumerWidget {
                   color: dark ? Colors.black12 : Colors.grey[100],
                   border: Border.all(
                     color: dark
-                        ? Colors.white.withOpacity(0.05)
-                        : Colors.black.withOpacity(0.05),
-                  ).withOpacity(0.08),
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.black.withValues(alpha: 0.05),
+                  ),
                 ),
                 child: NavigationBar(
                   height: 64,
                   elevation: 0,
                   backgroundColor: dark ? Colors.black12 : Colors.grey[100],
                   indicatorColor: dark
-                      ? Colors.white.withOpacity(0.08)
-                      : Colors.black.withOpacity(0.08),
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : Colors.black.withValues(alpha: 0.08),
                   labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
                   selectedIndex: ref.watch(selectedIndexProvider),
                   onDestinationSelected: (index) {
