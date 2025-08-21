@@ -10,4 +10,5 @@ class Routes {
   static const String question = '/question';
   static const String result = '/result';
   static const String profile = '/profile';
+  static const String siteLocation = '/site-location';
 }

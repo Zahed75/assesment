@@ -1,4 +1,3 @@
-import 'package:assesment/navigation_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -33,20 +32,11 @@ class SiteLocation extends ConsumerWidget {
         )
         .toList();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: const Text(
-          'Select Your Site',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
-        ),
-        centerTitle: true,
-        elevation: 1,
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
-      backgroundColor: Theme.of(context).brightness == Brightness.dark
-          ? Colors.grey[900]
-          : Colors.grey[100],
+      appBar: AppBar(title: const Text('Select Your Site'), centerTitle: true),
+      backgroundColor: isDark ? Colors.grey[900] : Colors.grey[100],
       body: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -54,7 +44,7 @@ class SiteLocation extends ConsumerWidget {
             // Search Bar
             TextField(
               onChanged: (query) {
-                ref.read(searchQueryProvider.state).state = query;
+                ref.read(searchQueryProvider.notifier).state = query;
               },
               decoration: InputDecoration(
                 hintText: 'Search by site code or name',
@@ -64,7 +54,7 @@ class SiteLocation extends ConsumerWidget {
                     : IconButton(
                         icon: const Icon(Icons.clear),
                         onPressed: () {
-                          ref.read(searchQueryProvider.state).state = '';
+                          ref.read(searchQueryProvider.notifier).state = '';
                         },
                       ),
                 filled: true,
@@ -81,7 +71,6 @@ class SiteLocation extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
 
-            // No results found
             if (filteredSites.isEmpty)
               const Expanded(child: Center(child: Text('No results found'))),
 
@@ -101,19 +90,9 @@ class SiteLocation extends ConsumerWidget {
                   final siteName = site['name']!;
 
                   return GestureDetector(
-                    onTap: () async {
-                      // Simulate site selection and navigation
-                      debugPrint(
-                        '[HomeSiteLocation] TAP site_code=$siteCode, name="$siteName"',
-                      );
-                      // Here, simulate storing the selected site
-                      // Navigate to the next screen after site selection
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const NavigationMenu(),
-                        ),
-                      );
+                    onTap: () {
+                      // For now: just pop back to Home
+                      Navigator.of(context).pop();
                     },
                     child: Container(
                       padding: const EdgeInsets.all(10),
@@ -122,7 +101,7 @@ class SiteLocation extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 4,
                             offset: const Offset(1, 2),
                           ),

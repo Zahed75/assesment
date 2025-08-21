@@ -1,3 +1,4 @@
+// lib/features/authentication/screens/signup/signup.dart
 import 'package:assesment/common_ui/styles/padding.dart';
 import 'package:assesment/features/signup/widgets/signup_form.dart';
 import 'package:assesment/utils/constants/sizes.dart';
@@ -18,15 +19,13 @@ class SignUpScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ///-----[Header]---///
               Text(
                 UTexts.signupTitle,
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
-              SizedBox(height: USizes.spaceBtwSections),
+              const SizedBox(height: USizes.spaceBtwSections),
 
-              ///-----[Form]---///
-              USignupForm(),
+              const USignupForm(),
             ],
           ),
         ),

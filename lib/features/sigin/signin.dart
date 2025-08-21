@@ -10,12 +10,15 @@ import 'package:assesment/utils/constants/sizes.dart';
 import 'package:assesment/utils/constants/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../app/router/routes.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState(); // Use ConsumerState instead of State
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
@@ -70,6 +73,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 UElevatedButton(
                   onPressed: () {
                     // Handle login logic here when connected to API
+                    context.go(Routes.home);
                   },
                   child: const Text(UTexts.signIn),
                 ),

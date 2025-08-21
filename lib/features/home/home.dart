@@ -1,3 +1,4 @@
+import 'package:assesment/features/site/site_location.dart'; // ⬅️ add this import
 import 'package:assesment/features/survey/survey_info.dart';
 import 'package:assesment/utils/constants/colors.dart';
 import 'package:assesment/utils/constants/texts.dart';
@@ -22,9 +23,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Simulating data load with delay
-    _loadSiteCode();
-    _fetchSurveys();
+    // Avoid modifying providers during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadSiteCode();
+      _fetchSurveys();
+    });
   }
 
   // Load site code from storage (or just use a placeholder)
@@ -35,22 +38,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // Simulate fetching surveys (replace with real API logic later)
   Future<void> _fetchSurveys() async {
-    await Future.delayed(const Duration(seconds: 2)); // Simulate loading delay
+    await Future.delayed(const Duration(seconds: 1)); // Simulate loading delay
 
     final mockSurveys = [
-      {'title': 'Survey 1', 'questions': [], 'totalQuestions': 10},
-      {'title': 'Survey 2', 'questions': [], 'totalQuestions': 5},
+      {
+        'title': 'Survey 1',
+        'questions': List.filled(10, {}),
+        'totalQuestions': 10,
+      },
+      {
+        'title': 'Survey 2',
+        'questions': List.filled(5, {}),
+        'totalQuestions': 5,
+      },
     ];
     ref.read(surveysProvider.notifier).state = mockSurveys;
     ref.read(isLoadingProvider.notifier).state = false; // Stop loading
   }
 
-  // Handle site selection
-  Future<void> _selectSite() async {
-    final updatedCode =
-        'D013'; // Simulated updated site code from HomeSiteLocation screen
-    ref.read(siteCodeProvider.notifier).state = updatedCode;
-    await _fetchSurveys(); // Refetch surveys after site change
+  // Handle site selection: just open the screen; the system back will return to Home
+  Future<void> _openSiteLocation() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const SiteLocation(isSelectionMode: true),
+      ),
+    );
+    // No result handling needed right now. If later you want to use the selection,
+    // you can read the returned value from `await` and update providers here.
   }
 
   @override
@@ -87,7 +102,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: _selectSite,
+                    onTap: _openSiteLocation, // ⬅️ open SiteLocation
                     child: Row(
                       children: [
                         ConstrainedBox(
@@ -181,7 +196,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         estimatedTime: '${qLen * 1} min',
                                         onStart: () {
                                           // Handle start of the survey
-                                          // Get.to(() => QuestionScreen(surveyData: survey));
                                         },
                                       ),
                                       const SizedBox(height: 16),
