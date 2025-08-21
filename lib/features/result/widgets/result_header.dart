@@ -34,7 +34,7 @@ class SurveyResultHeader extends StatelessWidget {
             children: [
               // Line 1: Site code
               Text(
-                "$siteCode",
+                siteCode,
                 style: Theme.of(context).textTheme.bodyLarge,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -43,7 +43,7 @@ class SurveyResultHeader extends StatelessWidget {
 
               // Line 2: Site name (with ellipsis if long)
               Text(
-                "${siteName ?? ''}",
+                siteName ?? '',
                 style: Theme.of(context).textTheme.bodyLarge,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -52,7 +52,7 @@ class SurveyResultHeader extends StatelessWidget {
 
               // Date
               Text(
-                "$formattedDate",
+                formattedDate,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 4),
@@ -103,7 +103,7 @@ class SurveyResultHeader extends StatelessWidget {
 
               // Center Percentage Text
               Text(
-                '$resultPercent',
+                resultPercent,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.primary,

@@ -30,7 +30,7 @@ class DashboardScreen extends ConsumerWidget {
     bool isMyOutletSelected = true;
     DateTimeRange? selectedRange;
 
-    void _openDatePicker() async {
+    void openDatePicker() async {
       final picked = await showDateRangePicker(
         context: context,
         firstDate: DateTime(2024),
@@ -67,7 +67,7 @@ class DashboardScreen extends ConsumerWidget {
             Row(
               children: [
                 IconButton(
-                  onPressed: _openDatePicker,
+                  onPressed: openDatePicker,
                   icon: const Icon(Iconsax.filter),
                 ),
                 const SizedBox(width: 12),

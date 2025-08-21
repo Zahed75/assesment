@@ -7,7 +7,6 @@ import 'package:assesment/features/result/result.dart';
 import 'package:assesment/features/sigin/signin.dart';
 import 'package:assesment/features/verify_otp/otp_verify.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: Routes.onboarding,

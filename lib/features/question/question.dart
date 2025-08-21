@@ -28,7 +28,7 @@ class QuestionScreen extends ConsumerStatefulWidget {
 class _QuestionScreenState extends ConsumerState<QuestionScreen> {
   bool isSubmitting = false;
 
-  get submitSurvey => null;
+  Null get submitSurvey => null;
 
   @override
   void initState() {
@@ -174,7 +174,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
                     ref.read(answersProvider.notifier).state[id] = val;
                   }),
                 );
-              }).toList(),
+              }),
             ],
 
             // multiple_scoring (single pick, scored by choice.marks)

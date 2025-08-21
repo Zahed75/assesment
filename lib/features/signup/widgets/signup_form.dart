@@ -89,9 +89,20 @@ class USignupForm extends ConsumerWidget {
           icon: const Icon(Iconsax.arrow_down_1),
           dropdownColor: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          items: ['Manager', 'Sales', 'Support', 'Developer'].map((role) {
-            return DropdownMenuItem<String>(value: role, child: Text(role));
-          }).toList(),
+          items:
+              [
+                'Zonal Manager (ZM)',
+                'Outlet Manager (OM)',
+                'Inventory & Cash Management Officer (ICMO)',
+                'Back store Manager (BSM)',
+                'Manager',
+                'Sales',
+                'Support',
+                'HR',
+                'Developer',
+              ].map((role) {
+                return DropdownMenuItem<String>(value: role, child: Text(role));
+              }).toList(),
           onChanged: (value) {
             signUpController.updateDesignation(value ?? '');
           },

@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
 
-import '../../../../utils/constants/sizes.dart';
-
 // Define Riverpod providers for state management (no API data for now)
 final isLoadingProvider = StateProvider<bool>((ref) => true);
 final surveysProvider = StateProvider<List<Map<String, dynamic>>>((ref) => []);

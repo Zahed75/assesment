@@ -1,7 +1,8 @@
 import 'package:assesment/utils/helpers/device_helpers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class UElevatedButton extends StatelessWidget {
+class UElevatedButton extends ConsumerWidget {
   const UElevatedButton({
     super.key,
     required this.onPressed,
@@ -11,7 +12,7 @@ class UElevatedButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Widget child;
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
     return SizedBox(
       width: UDeviceHelper.getScreenWidth(context),
       child: ElevatedButton(onPressed: onPressed, child: child),
