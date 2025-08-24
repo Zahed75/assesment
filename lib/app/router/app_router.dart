@@ -17,14 +17,16 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const OnboardingScreen(),
     ),
     GoRoute(
+      name: 'signIn',
       path: Routes.signIn,
-      builder: (context, state) => const LoginScreen(),
+      builder: (context, state) => const LoginScreen(),   // this must be the real Sign-In UI
     ),
     GoRoute(
       path: Routes.otpVerify,
       builder: (context, state) {
-        final phoneNumber = state.queryParams['phoneNumber'];
-        return OtpVerifyScreen(phoneNumber: phoneNumber ?? '');
+        final phoneNumber = state.queryParams['phoneNumber'] ?? '';
+        final otp = state.queryParams['otp']; // <-- add this
+        return OtpVerifyScreen(phoneNumber: phoneNumber, otp: otp);
       },
     ),
 

@@ -1,8 +1,16 @@
+import 'package:assesment/core/config/env.dart';
 import 'package:assesment/utils/helpers/print_value.dart';
 import 'package:dio/dio.dart';
 
 Dio getDio() {
-  final dio = Dio();
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: '', // <— IMPORTANT: one place to set base url
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 30),
+      headers: {'Accept': 'application/json'},
+    ),
+  );
 
   dio.interceptors.add(
     InterceptorsWrapper(

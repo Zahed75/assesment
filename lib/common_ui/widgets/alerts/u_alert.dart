@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 
 class UAlert {
-  /// Flash-style popup alert for success, error, info
-  static void show({
+  /// Return the dialog Future so callers can `await` it.
+  static Future<void> show({
     required String title,
     required String message,
     Color? bgColor,
@@ -11,9 +11,10 @@ class UAlert {
     IconData icon = Icons.info_outline_rounded,
     Color? iconColor,
     bool isDismissible = true,
-    required BuildContext context, // Pass context for the dialog
+    required BuildContext context,
+    VoidCallback? onOk, // 👈 add this
   }) {
-    showDialog(
+    return showDialog<void>(
       context: context,
       barrierDismissible: isDismissible,
       builder: (context) => Dialog(

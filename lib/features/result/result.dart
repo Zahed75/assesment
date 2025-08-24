@@ -428,7 +428,7 @@ class _SummaryTabState extends State<_SummaryTab> {
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(99),
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                     ),
                     child: Text(
                       '${score.toStringAsFixed(0)} / ${total.toStringAsFixed(0)} • ${(percent * 100).toStringAsFixed(0)}%',
@@ -601,7 +601,7 @@ class _AllQuestionsTabState extends State<_AllQuestionsTab> {
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(99),
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                   ),
                   child: Text(item['category'] ?? '',
                       style: textTheme.labelSmall?.copyWith(
@@ -619,3 +619,13 @@ class _AllQuestionsTabState extends State<_AllQuestionsTab> {
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
