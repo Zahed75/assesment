@@ -49,7 +49,7 @@ class VerifyOtpNotifier extends StateNotifier<VerifyOtpState> {
       );
 
       if (context.mounted) {
-        context.go(Routes.home);
+        context.go(Routes.signIn);
       }
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
