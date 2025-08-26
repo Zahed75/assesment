@@ -1,12 +1,9 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:assesment/common_ui/widgets/alerts/u_alert.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
 
 // Providers for Riverpod
 final locationProvider = StateProvider<Position?>((ref) => null);

@@ -1,19 +1,25 @@
-class VerifyOtpModel {
+// lib/features/sigin/model/user_login_model.dart
+class UserLoginModel {
   String? message;
-  User? user;
+  List<User>? user;
 
-  VerifyOtpModel({this.message, this.user});
+  UserLoginModel({this.message, this.user});
 
-  VerifyOtpModel.fromJson(Map<String, dynamic> json) {
+  UserLoginModel.fromJson(Map<String, dynamic> json) {
     message = json['message'];
-    user = json['user'] != null ? User.fromJson(json['user']) : null;
+    if (json['user'] != null) {
+      user = <User>[];
+      json['user'].forEach((v) {
+        user!.add(User.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['message'] = message;
     if (user != null) {
-      data['user'] = user!.toJson();
+      data['user'] = user!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -21,56 +27,64 @@ class VerifyOtpModel {
 
 class User {
   int? id;
+  String? accessToken;
+  String? refreshToken;
+  String? tokenType;
+  int? expiry;
   String? username;
-  String? firstName;
-  String? lastName;
   String? email;
-  Role? role;
-  String? staffId;
-  String? designation;
   String? name;
   String? phoneNumber;
+  String? designation;
+  String? staffId;
+  Role? role;
 
   User({
     this.id,
+    this.accessToken,
+    this.refreshToken,
+    this.tokenType,
+    this.expiry,
     this.username,
-    this.firstName,
-    this.lastName,
     this.email,
-    this.role,
-    this.staffId,
-    this.designation,
     this.name,
     this.phoneNumber,
+    this.designation,
+    this.staffId,
+    this.role,
   });
 
   User.fromJson(Map<String, dynamic> json) {
     id = json['id'];
+    accessToken = json['access_token'];
+    refreshToken = json['refresh_token'];
+    tokenType = json['token_type'];
+    expiry = json['expiry'];
     username = json['username'];
-    firstName = json['first_name'];
-    lastName = json['last_name'];
     email = json['email'];
-    role = json['role'] != null ? Role.fromJson(json['role']) : null;
-    staffId = json['staff_id'];
-    designation = json['designation'];
     name = json['name'];
     phoneNumber = json['phone_number'];
+    designation = json['designation'];
+    staffId = json['staff_id'];
+    role = json['role'] != null ? Role.fromJson(json['role']) : null;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
+    data['access_token'] = accessToken;
+    data['refresh_token'] = refreshToken;
+    data['token_type'] = tokenType;
+    data['expiry'] = expiry;
     data['username'] = username;
-    data['first_name'] = firstName;
-    data['last_name'] = lastName;
     data['email'] = email;
+    data['name'] = name;
+    data['phone_number'] = phoneNumber;
+    data['designation'] = designation;
+    data['staff_id'] = staffId;
     if (role != null) {
       data['role'] = role!.toJson();
     }
-    data['staff_id'] = staffId;
-    data['designation'] = designation;
-    data['name'] = name;
-    data['phone_number'] = phoneNumber;
     return data;
   }
 }
@@ -104,7 +118,7 @@ class Role {
 class Platform {
   int? id;
   String? name;
-  Null description;
+  String? description;
 
   Platform({this.id, this.name, this.description});
 

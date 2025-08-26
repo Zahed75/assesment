@@ -44,11 +44,11 @@ class _USignupFormState extends ConsumerState<USignupForm> {
   void initState() {
     super.initState();
     final s = ref.read(signUpProvider);
-    _nameCtrl  = TextEditingController(text: s.name);
+    _nameCtrl = TextEditingController(text: s.name);
     _emailCtrl = TextEditingController(text: s.email);
     _phoneCtrl = TextEditingController(text: s.phoneNumber);
     _staffCtrl = TextEditingController(text: s.staffId);
-    _passCtrl  = TextEditingController(text: s.password);
+    _passCtrl = TextEditingController(text: s.password);
   }
 
   @override
@@ -67,10 +67,11 @@ class _USignupFormState extends ConsumerState<USignupForm> {
     final email = _emailCtrl.text.trim();
     final phone = _phoneCtrl.text.trim();
     final staff = _staffCtrl.text.trim();
-    final pass  = _passCtrl.text;
+    final pass = _passCtrl.text;
 
-    final emailReg =
-    RegExp(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');
+    final emailReg = RegExp(
+      r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$',
+    );
 
     if (name.isEmpty) {
       UAlert.show(
@@ -222,33 +223,39 @@ class _USignupFormState extends ConsumerState<USignupForm> {
 
         // Designation
         DropdownButtonFormField<String>(
-          value: state.designation.isEmpty ? null : state.designation,
+          initialValue: state.designation.isEmpty ? null : state.designation,
           isExpanded: true,
           icon: const Icon(Iconsax.arrow_down_1),
           dropdownColor: Colors.white,
           borderRadius: BorderRadius.circular(12),
           style: Theme.of(context).textTheme.bodyMedium,
           items: _designations
-              .map((role) => DropdownMenuItem(
-            value: role,
-            child: Row(
-              children: [
-                const Icon(Iconsax.user, size: 18, color: UColors.primary),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    role,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
+              .map(
+                (role) => DropdownMenuItem(
+                  value: role,
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Iconsax.user,
+                        size: 18,
+                        color: UColors.primary,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          role,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ))
+              )
               .toList(),
           onChanged: (v) => ctrl.updateDesignation(v ?? ''),
           decoration: InputDecoration(
@@ -256,7 +263,10 @@ class _USignupFormState extends ConsumerState<USignupForm> {
             prefixIcon: const Icon(Iconsax.briefcase),
             filled: true,
             fillColor: isDark ? Colors.black12 : Colors.grey[100],
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: Colors.grey.shade400),
@@ -275,7 +285,8 @@ class _USignupFormState extends ConsumerState<USignupForm> {
             labelText: UTexts.password,
             suffixIcon: IconButton(
               icon: Icon(_obscurePassword ? Iconsax.eye : Iconsax.eye_slash),
-              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+              onPressed: () =>
+                  setState(() => _obscurePassword = !_obscurePassword),
             ),
           ),
         ),
@@ -327,27 +338,33 @@ class _USignupFormState extends ConsumerState<USignupForm> {
             onPressed: state.isLoading
                 ? null
                 : () {
-              // 1) Validate with UAlert
-              final ok = _validateAndAlert(context, ref.read(signUpProvider).designation);
-              if (!ok) return;
+                    // 1) Validate with UAlert
+                    final ok = _validateAndAlert(
+                      context,
+                      ref.read(signUpProvider).designation,
+                    );
+                    if (!ok) return;
 
-              // 2) Push values to provider just-in-time
-              final ctrl = ref.read(signUpProvider.notifier);
-              ctrl.updateName(_nameCtrl.text.trim());
-              ctrl.updateEmail(_emailCtrl.text.trim());
-              ctrl.updatePhoneNumber(_phoneCtrl.text.trim());
-              ctrl.updateStaffId(_staffCtrl.text.trim());
-              ctrl.updatePassword(_passCtrl.text);
+                    // 2) Push values to provider just-in-time
+                    final ctrl = ref.read(signUpProvider.notifier);
+                    ctrl.updateName(_nameCtrl.text.trim());
+                    ctrl.updateEmail(_emailCtrl.text.trim());
+                    ctrl.updatePhoneNumber(_phoneCtrl.text.trim());
+                    ctrl.updateStaffId(_staffCtrl.text.trim());
+                    ctrl.updatePassword(_passCtrl.text);
 
-              // 3) Call API
-              ctrl.registerUser(context);
-            },
+                    // 3) Call API
+                    ctrl.registerUser(context);
+                  },
             child: state.isLoading
                 ? const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-            )
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
                 : const Text(UTexts.createAccount),
           ),
         ),

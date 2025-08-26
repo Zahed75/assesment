@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 
 class UAlert {
-  /// Return the dialog Future so callers can `await` it.
   static Future<void> show({
     required String title,
     required String message,
@@ -12,9 +11,9 @@ class UAlert {
     Color? iconColor,
     bool isDismissible = true,
     required BuildContext context,
-    VoidCallback? onOk, // 👈 add this
-  }) {
-    return showDialog<void>(
+    VoidCallback? onOk,
+  }) async {
+    await showDialog<void>(
       context: context,
       barrierDismissible: isDismissible,
       builder: (context) => Dialog(
@@ -50,7 +49,10 @@ class UAlert {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    onOk?.call();
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: iconColor ?? Colors.redAccent,
                     shape: RoundedRectangleBorder(

@@ -1,7 +1,8 @@
 // lib/app/router/app_router.dart
 import 'package:assesment/app/router/routes.dart';
 import 'package:assesment/features/onBoarding/onBoarding.dart';
-import 'package:assesment/features/sigin/signin.dart';
+import 'package:assesment/features/signin/signin.dart';
+
 import 'package:assesment/features/verify_otp/otp_verify.dart';
 import 'package:assesment/features/profile/profile.dart';
 import 'package:assesment/features/question/question.dart';
@@ -19,7 +20,8 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       name: 'signIn',
       path: Routes.signIn,
-      builder: (context, state) => const LoginScreen(),   // this must be the real Sign-In UI
+      builder: (context, state) =>
+          const LoginScreen(), // this must be the real Sign-In UI
     ),
     GoRoute(
       path: Routes.otpVerify,
@@ -47,7 +49,9 @@ final GoRouter appRouter = GoRouter(
       path: Routes.result,
       builder: (context, state) {
         final responseIdString = state.queryParams['responseId'];
-        final responseId = responseIdString != null ? int.tryParse(responseIdString) : null;
+        final responseId = responseIdString != null
+            ? int.tryParse(responseIdString)
+            : null;
         return ResultScreen(responseId: responseId ?? 0);
       },
     ),

@@ -1,5 +1,5 @@
 // lib/features/authentication/screens/login/widgets/login_form.dart
-import 'package:assesment/features/sigin/notifier/login_notifier.dart';
+import 'package:assesment/features/signin/notifier/login_notifier.dart';
 import 'package:assesment/utils/constants/sizes.dart';
 import 'package:assesment/utils/constants/texts.dart';
 import 'package:flutter/material.dart';
@@ -21,12 +21,13 @@ class ULoginForm extends ConsumerWidget {
         // Phone Number
         TextFormField(
           controller: controller.phoneController,
-          keyboardType: TextInputType.number,
+          keyboardType: TextInputType.phone,
           maxLength: 11,
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
             LengthLimitingTextInputFormatter(11),
           ],
+          enabled: !loginState.isLoading,
           decoration: const InputDecoration(
             prefixIcon: Icon(Iconsax.direct_right),
             prefixText: '+88 ',
@@ -40,6 +41,7 @@ class ULoginForm extends ConsumerWidget {
         TextFormField(
           controller: controller.passwordController,
           obscureText: loginState.hidePassword,
+          enabled: !loginState.isLoading,
           decoration: InputDecoration(
             prefixIcon: const Icon(Iconsax.password_check),
             labelText: UTexts.password,
@@ -47,7 +49,9 @@ class ULoginForm extends ConsumerWidget {
               icon: Icon(
                 loginState.hidePassword ? Iconsax.eye : Iconsax.eye_slash,
               ),
-              onPressed: controller.togglePasswordVisibility,
+              onPressed: loginState.isLoading
+                  ? null
+                  : controller.togglePasswordVisibility,
             ),
           ),
         ),

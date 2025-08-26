@@ -1,5 +1,6 @@
 // lib/features/authentication/screens/login/widgets/remember_me.dart
-import 'package:assesment/features/sigin/notifier/login_notifier.dart';
+
+import 'package:assesment/features/signin/notifier/login_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

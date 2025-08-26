@@ -1,7 +1,7 @@
 // lib/navigation_menu.dart
-import 'package:assesment/features/dashboard/coming_soon.dart';
 import 'package:assesment/features/dashboard/dashboard.dart';
 import 'package:assesment/features/home/home.dart';
+import 'package:assesment/features/profile/profile.dart';
 import 'package:assesment/features/result/result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,7 +29,7 @@ class NavigationMenu extends ConsumerWidget {
         body = const DashboardScreen();
         break;
       case 3:
-        body = const ComingSoon();
+        body = const ProfileScreen();
         break;
       default:
         body = const HomeScreen();
@@ -65,12 +65,24 @@ class NavigationMenu extends ConsumerWidget {
                 labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
                 selectedIndex: index,
                 onDestinationSelected: (i) =>
-                ref.read(selectedIndexProvider.notifier).state = i,
+                    ref.read(selectedIndexProvider.notifier).state = i,
                 destinations: const [
-                  NavigationDestination(icon: Icon(Iconsax.home), label: 'Home'),
-                  NavigationDestination(icon: Icon(Iconsax.shop), label: 'History'),
-                  NavigationDestination(icon: Icon(Iconsax.menu_board), label: 'Dashboard'),
-                  NavigationDestination(icon: Icon(Iconsax.user), label: 'Profile'),
+                  NavigationDestination(
+                    icon: Icon(Iconsax.home),
+                    label: 'Home',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Iconsax.shop),
+                    label: 'History',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Iconsax.menu_board),
+                    label: 'Dashboard',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Iconsax.user),
+                    label: 'Profile',
+                  ),
                 ],
               ),
             ),

@@ -1,6 +1,6 @@
 import 'package:assesment/common_ui/widgets/alerts/u_alert.dart';
 import 'package:assesment/core/theme/theme_notifier.dart';
-import 'package:assesment/features/sigin/signin.dart';
+import 'package:assesment/features/signin/signin.dart';
 
 import 'package:assesment/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';

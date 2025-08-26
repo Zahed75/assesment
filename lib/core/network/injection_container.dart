@@ -1,4 +1,3 @@
-import 'package:assesment/core/config/env.dart';
 import 'package:assesment/utils/helpers/print_value.dart';
 import 'package:dio/dio.dart';
 

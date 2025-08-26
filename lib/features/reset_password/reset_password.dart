@@ -1,6 +1,6 @@
 import 'package:assesment/common_ui/styles/padding.dart';
 import 'package:assesment/common_ui/widgets/button/elevated_button.dart';
-import 'package:assesment/features/sigin/signin.dart';
+import 'package:assesment/features/signin/signin.dart';
 import 'package:assesment/utils/constants/images.dart';
 import 'package:assesment/utils/constants/sizes.dart';
 import 'package:assesment/utils/constants/texts.dart';
