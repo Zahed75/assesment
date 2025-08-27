@@ -1,17 +1,25 @@
-import 'package:assesment/features/site/site_location.dart'; // ⬅️ add this import
+// lib/features/home/home.dart
+import 'package:assesment/common_ui/widgets/alerts/u_alert.dart';
+import 'package:assesment/features/home/model/survey_list_model.dart';
+import 'package:assesment/features/home/provider/survey_api_provider.dart';
+import 'package:assesment/features/site/site_location.dart';
 import 'package:assesment/features/survey/survey_info.dart';
 import 'package:assesment/utils/constants/colors.dart';
 import 'package:assesment/utils/constants/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 
-// Define Riverpod providers for state management (no API data for now)
+// Define Riverpod providers for state management
 final isLoadingProvider = StateProvider<bool>((ref) => true);
-final surveysProvider = StateProvider<List<Map<String, dynamic>>>((ref) => []);
+final surveysProvider = StateProvider<List<SurveyData>>(
+  (ref) => [],
+); // Changed to SurveyData
 final siteCodeProvider = StateProvider<String>((ref) => 'Loading...');
+final errorMessageProvider = StateProvider<String?>((ref) => null);
 
-// HomeScreen UI (migrated to Riverpod)
+// HomeScreen UI
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -23,7 +31,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Avoid modifying providers during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadSiteCode();
       _fetchSurveys();
@@ -36,27 +43,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.read(siteCodeProvider.notifier).state = siteCode;
   }
 
-  // Simulate fetching surveys (replace with real API logic later)
+  // Fetch surveys from API
   Future<void> _fetchSurveys() async {
-    await Future.delayed(const Duration(seconds: 1)); // Simulate loading delay
+    final surveyApi = ref.read(surveyApiProvider);
 
-    final mockSurveys = [
-      {
-        'title': 'Survey 1',
-        'questions': List.filled(10, {}),
-        'totalQuestions': 10,
-      },
-      {
-        'title': 'Survey 2',
-        'questions': List.filled(5, {}),
-        'totalQuestions': 5,
-      },
-    ];
-    ref.read(surveysProvider.notifier).state = mockSurveys;
-    ref.read(isLoadingProvider.notifier).state = false; // Stop loading
+    ref.read(isLoadingProvider.notifier).state = true;
+    ref.read(errorMessageProvider.notifier).state = null;
+
+    try {
+      final surveyList = await surveyApi.getSurveysByUser();
+
+      if (surveyList.data != null && surveyList.data!.isNotEmpty) {
+        ref.read(surveysProvider.notifier).state = surveyList.data!;
+      } else {
+        ref.read(surveysProvider.notifier).state = [];
+      }
+    } catch (e) {
+      ref.read(errorMessageProvider.notifier).state = e.toString();
+      // Show error alert
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        UAlert.show(
+          // Fixed UAlert reference
+          title: 'Error',
+          message:
+              'Failed to load surveys: ${e.toString().replaceAll('Exception: ', '')}',
+          context: context,
+        );
+      });
+    } finally {
+      ref.read(isLoadingProvider.notifier).state = false;
+    }
   }
 
-  // Handle site selection: just open the screen; the system back will return to Home
+  // Handle site selection
   Future<void> _openSiteLocation() async {
     await Navigator.push(
       context,
@@ -64,8 +83,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         builder: (_) => const SiteLocation(isSelectionMode: true),
       ),
     );
-    // No result handling needed right now. If later you want to use the selection,
-    // you can read the returned value from `await` and update providers here.
+  }
+
+  // Handle survey start
+  void _onStartSurvey(SurveyData survey) {
+    // Changed to SurveyData
+    print('Starting survey: ${survey.title}');
+    // TODO: Implement survey navigation
   }
 
   @override
@@ -73,10 +97,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isLoading = ref.watch(isLoadingProvider);
     final siteCode = ref.watch(siteCodeProvider);
     final surveys = ref.watch(surveysProvider);
+    final errorMessage = ref.watch(errorMessageProvider);
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final subtitleColor = isDark ? Colors.white70 : Colors.black54;
     final textColor = isDark ? UColors.white : UColors.dark;
+
+    // Show error message if exists
+    if (errorMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        UAlert.show(
+          // Fixed UAlert reference
+          title: 'Error',
+          message: errorMessage,
+          context: context,
+        );
+        ref.read(errorMessageProvider.notifier).state = null;
+      });
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -102,7 +140,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: _openSiteLocation, // ⬅️ open SiteLocation
+                    onTap: _openSiteLocation,
                     child: Row(
                       children: [
                         ConstrainedBox(
@@ -165,9 +203,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 itemCount: surveys.length,
                                 itemBuilder: (context, index) {
                                   final survey = surveys[index];
-                                  final qLen =
-                                      (survey['questions'] as List?)?.length ??
-                                      0;
+                                  final questionCount =
+                                      survey.questions?.length ?? 0;
+                                  final estimatedTime =
+                                      questionCount * 1; // 1 min per question
 
                                   return Column(
                                     crossAxisAlignment:
@@ -191,12 +230,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           ),
                                         ),
                                       SurveyInfo(
-                                        title: survey['title'] ?? '',
-                                        totalQuestions: qLen,
-                                        estimatedTime: '${qLen * 1} min',
-                                        onStart: () {
-                                          // Handle start of the survey
-                                        },
+                                        title:
+                                            survey.title ?? 'Untitled Survey',
+                                        totalQuestions: questionCount,
+                                        estimatedTime: '$estimatedTime min',
+                                        onStart: () => _onStartSurvey(survey),
                                       ),
                                       const SizedBox(height: 16),
                                     ],

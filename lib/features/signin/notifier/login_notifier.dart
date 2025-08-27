@@ -2,6 +2,7 @@
 import 'package:assesment/features/signin/api/login_api.dart';
 import 'package:assesment/features/signin/model/user_login_model.dart';
 import 'package:assesment/features/signin/provider/login_provider.dart';
+import 'package:assesment/utils/constants/token_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod/riverpod.dart';
 
@@ -84,9 +85,10 @@ class LoginNotifier extends StateNotifier<LoginState> {
   }
 
   void _saveTokens(String? accessToken, String? refreshToken, bool rememberMe) {
-    // TODO: Implement token saving
-    print('Access Token: $accessToken');
-    print('Remember Me: $rememberMe');
+    // Save the access token
+    if (accessToken != null) {
+      TokenStorage.saveToken(accessToken); // Save token to shared preferences
+    }
   }
 
   void _saveUserData(User userData) {

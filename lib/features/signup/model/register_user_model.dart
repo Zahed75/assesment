@@ -32,6 +32,10 @@ class Data {
         : <dynamic>[],
   );
 
+  get title => null;
+
+  get questions => null;
+
   Map<String, dynamic> toJson() => {
     if (user != null) 'user': user!.toJson(),
     if (profile != null) 'profile': profile!.toJson(),
@@ -101,7 +105,9 @@ class Role {
   factory Role.fromJson(Map<String, dynamic> json) => Role(
     id: json['id'],
     name: json['name'],
-    platform: json['platform'] != null ? Platform.fromJson(json['platform']) : null,
+    platform: json['platform'] != null
+        ? Platform.fromJson(json['platform'])
+        : null,
   );
 
   Map<String, dynamic> toJson() => {
