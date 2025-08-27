@@ -4,6 +4,9 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need your location to provide survey functionality.</string>
+
 	<key>CFBundleDisplayName</key>
 	<string>Assesment</string>
 	<key>CFBundleExecutable</key>

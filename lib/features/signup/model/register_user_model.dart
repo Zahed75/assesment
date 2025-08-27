@@ -32,9 +32,9 @@ class Data {
         : <dynamic>[],
   );
 
-  get title => null;
+  Null get title => null;
 
-  get questions => null;
+  Null get questions => null;
 
   Map<String, dynamic> toJson() => {
     if (user != null) 'user': user!.toJson(),

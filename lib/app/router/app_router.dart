@@ -38,13 +38,21 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const NavigationMenu(),
     ),
 
+    // lib/app/router/app_router.dart
     GoRoute(
       path: Routes.question,
       builder: (context, state) {
         final surveyData = state.extra as Map<String, dynamic>? ?? {};
-        return QuestionScreen(surveyData: surveyData);
+        final siteCode =
+            state.queryParams['siteCode'] ??
+            ''; // Extract siteCode from queryParams
+        return QuestionScreen(
+          surveyData: surveyData,
+          siteCode: siteCode,
+        ); // Pass siteCode here
       },
     ),
+
     GoRoute(
       path: Routes.result,
       builder: (context, state) {

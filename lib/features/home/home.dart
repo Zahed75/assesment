@@ -1,4 +1,5 @@
 // lib/features/home/home.dart
+import 'package:assesment/app/router/routes.dart';
 import 'package:assesment/common_ui/widgets/alerts/u_alert.dart';
 import 'package:assesment/features/home/model/survey_list_model.dart';
 import 'package:assesment/features/home/provider/survey_api_provider.dart';
@@ -85,11 +86,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // Handle survey start
+  // lib/features/home/home.dart
+
   void _onStartSurvey(SurveyData survey) {
-    // Changed to SurveyData
-    print('Starting survey: ${survey.title}');
-    // TODO: Implement survey navigation
+    // Pass the selected survey data to QuestionScreen
+    context.go(
+      Routes.question, // Navigate to the question route
+      extra: survey.toJson(), // Pass the surveyData as extra
+    );
   }
 
   @override
