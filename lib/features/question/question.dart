@@ -1,5 +1,7 @@
 import 'package:assesment/app/router/routes.dart';
 import 'package:assesment/common_ui/widgets/alerts/u_alert.dart';
+import 'package:assesment/features/question/model/survey_submit_model.dart';
+import 'package:assesment/features/question/provider/survey_submit_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:go_router/go_router.dart';
@@ -124,20 +126,247 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
     });
   }
 
-  void _submitSurvey() {
-    // Implement your submit logic here
+  // In your _submitSurvey method, add validation before submitting
+
+  // In your QuestionScreen class, replace the entire _submitSurvey method with this:
+  Future<void> _submitSurvey() async {
+    if (isSubmitting) return;
+
     setState(() => isSubmitting = true);
-    // Simulate API call
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() => isSubmitting = false);
+
+    try {
+      final surveySubmitApi = ref.read(surveySubmitApiProvider);
+      final answers = ref.read(answersProvider);
+      final currentLocation = ref.read(locationProvider);
+      final images = ref.read(imageProvider);
+      final detectedLocations = ref.read(detectedLocationProvider);
+
+      // Prepare question responses with validation
+      final List<Map<String, dynamic>> questionResponses = [];
+      final Map<int, String> imageFiles = {};
+      final List<String> validationErrors = [];
+
+      // Process regular questions (text, choice, linear, remarks, yesno, multiple_scoring)
+      for (var question in widget.surveyData['questions']) {
+        final questionId = question['id'];
+        final questionType = question['type'];
+        final isRequired = question['is_required'] ?? false;
+        final answer = answers[questionId];
+
+        // Skip image and location questions for now (handled separately)
+        if (questionType == 'image' || questionType == 'location') {
+          continue;
+        }
+
+        // Validate required questions
+        if (isRequired && answer == null) {
+          validationErrors.add('${question['text']} is required');
+          continue;
+        }
+
+        // Validate linear range
+        if (questionType == 'linear' && answer != null) {
+          final minValue = question['min_value'] ?? 0;
+          final maxValue = question['max_value'] ?? 100;
+          if (answer < minValue || answer > maxValue) {
+            validationErrors.add(
+              '${question['text']}: Value must be between $minValue and $maxValue',
+            );
+            continue;
+          }
+        }
+
+        // Validate text length
+        if ((questionType == 'text' || questionType == 'remarks') &&
+            answer is String) {
+          if (answer.length < 10) {
+            validationErrors.add(
+              '${question['text']}: Please provide more details (min 10 characters)',
+            );
+            continue;
+          }
+        }
+
+        if (answer != null) {
+          Map<String, dynamic> response = {'question': questionId};
+
+          switch (questionType) {
+            case 'yesno':
+            case 'choice':
+            case 'multiple_scoring':
+              response['selected_choice'] = {'id': answer};
+              break;
+
+            case 'linear':
+              response['linear_value'] = answer;
+              break;
+
+            case 'text':
+            case 'remarks':
+              response['answer_text'] = answer;
+              break;
+          }
+
+          questionResponses.add(response);
+        }
+      }
+
+      // Process image questions
+      for (var question in widget.surveyData['questions']) {
+        final questionId = question['id'];
+        final questionType = question['type'];
+        final isRequired = question['is_required'] ?? false;
+
+        if (questionType == 'image') {
+          final imagePath = images[questionId];
+
+          // Validate required image
+          if (isRequired && imagePath == null) {
+            validationErrors.add('${question['text']} is required');
+            continue;
+          }
+
+          if (imagePath != null) {
+            imageFiles[questionId] = imagePath;
+            // Add response entry for image question
+            questionResponses.add({'question': questionId});
+          }
+        }
+      }
+
+      // Process location questions
+      for (var question in widget.surveyData['questions']) {
+        final questionId = question['id'];
+        final questionType = question['type'];
+        final isRequired = question['is_required'] ?? false;
+
+        if (questionType == 'location') {
+          final location = detectedLocations[questionId];
+
+          // Validate required location
+          if (isRequired && location == null) {
+            validationErrors.add('${question['text']} is required');
+            continue;
+          }
+
+          if (location != null) {
+            questionResponses.add({
+              'question': questionId,
+              'location_lat': location['latitude'],
+              'location_lon': location['longitude'],
+            });
+          }
+        }
+      }
+
+      // Check for validation errors
+      if (validationErrors.isNotEmpty) {
+        throw Exception(
+          'Please complete all required fields:\n${validationErrors.join('\n')}',
+        );
+      }
+
+      // Ensure outlet_code is not empty
+      final effectiveOutletCode = widget.siteCode.isNotEmpty
+          ? widget.siteCode
+          : 'CH02';
+
+      // Submit the survey
+      final response = await surveySubmitApi.submitSurveyResponse(
+        surveyId: widget.surveyData['id'],
+        outletCode: effectiveOutletCode,
+        locationLat: currentLocation?.latitude,
+        locationLon: currentLocation?.longitude,
+        questionResponses: questionResponses,
+        imagePaths: imageFiles,
+      );
+
+      // Handle successful submission
+      _showSuccessDialog(response);
+    } catch (e) {
+      // Handle error with user-friendly message
+      final errorMessage = e.toString().replaceAll('Exception: ', '');
+
       UAlert.show(
-        title: "Success",
-        message: "Survey submitted successfully!",
-        icon: Icons.check_circle,
-        iconColor: Colors.green,
+        title: "Submission Failed",
+        message: errorMessage,
+        icon: Icons.error_outline,
+        iconColor: Colors.redAccent,
         context: context,
       );
-    });
+    } finally {
+      setState(() => isSubmitting = false);
+    }
+  }
+
+  // Add this method to show success dialog with results
+  void _showSuccessDialog(SurveySubmitResponseModel response) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.green),
+            SizedBox(width: 8),
+            Text("Survey Submitted"),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                response.message ?? "Survey submitted successfully!",
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                "Total Score: ${response.totalScore?.toStringAsFixed(2) ?? '0'}",
+              ),
+              Text("Survey: ${response.surveyTitle}"),
+              Text("Response ID: ${response.responseId}"),
+              const SizedBox(height: 16),
+              if (response.submittedQuestions != null)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Question Results:",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    ...response.submittedQuestions!
+                        .take(3)
+                        .map(
+                          (q) => Text(
+                            "• ${q.questionText}: ${q.obtainedMarks}/${q.maxMarks}",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                    if (response.submittedQuestions!.length > 3)
+                      Text(
+                        "+ ${response.submittedQuestions!.length - 3} more questions...",
+                      ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Navigate back to home screen
+              GoRouter.of(context).go(Routes.home);
+            },
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildCategoryHeader(
@@ -500,7 +729,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    "Lat: ${detectedLocation!["latitude"]!.toStringAsFixed(6)}, "
+                    "Lat: ${detectedLocation["latitude"]!.toStringAsFixed(6)}, "
                     "Lng: ${detectedLocation["longitude"]!.toStringAsFixed(6)}",
                     style: const TextStyle(color: Colors.blue),
                   ),

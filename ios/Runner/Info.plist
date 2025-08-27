@@ -6,7 +6,12 @@
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need your location to provide survey functionality.</string>
-
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to your camera to take photos for the survey.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photo library to upload photos for the survey.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>We need access to your documents to upload files for the survey.</string>
 	<key>CFBundleDisplayName</key>
 	<string>Assesment</string>
 	<key>CFBundleExecutable</key>
