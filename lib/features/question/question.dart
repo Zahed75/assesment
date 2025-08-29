@@ -282,7 +282,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
       );
 
       // Handle successful submission
-      _showSuccessDialog(response);
+      _navigateToResultScreen(response);
     } catch (e) {
       // Handle error with user-friendly message
       final errorMessage = e.toString().replaceAll('Exception: ', '');
@@ -300,73 +300,155 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
   }
 
   // Add this method to show success dialog with results
-  void _showSuccessDialog(SurveySubmitResponseModel response) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green),
-            SizedBox(width: 8),
-            Text("Survey Submitted"),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                response.message ?? "Survey submitted successfully!",
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                "Total Score: ${response.totalScore?.toStringAsFixed(2) ?? '0'}",
-              ),
-              Text("Survey: ${response.surveyTitle}"),
-              Text("Response ID: ${response.responseId}"),
-              const SizedBox(height: 16),
-              if (response.submittedQuestions != null)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Question Results:",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    ...response.submittedQuestions!
-                        .take(3)
-                        .map(
-                          (q) => Text(
-                            "• ${q.questionText}: ${q.obtainedMarks}/${q.maxMarks}",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                    if (response.submittedQuestions!.length > 3)
-                      Text(
-                        "+ ${response.submittedQuestions!.length - 3} more questions...",
-                      ),
-                  ],
-                ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // Navigate back to home screen
-              GoRouter.of(context).go(Routes.home);
-            },
-            child: const Text("OK"),
-          ),
-        ],
-      ),
+  // void _showSuccessDialog(SurveySubmitResponseModel response) {
+  //   showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (context) => AlertDialog(
+  //       title: const Row(
+  //         children: [
+  //           Icon(Icons.check_circle, color: Colors.green),
+  //           SizedBox(width: 8),
+  //           Text("Survey Submitted"),
+  //         ],
+  //       ),
+  //       content: SingleChildScrollView(
+  //         child: Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             Text(
+  //               response.message ?? "Survey submitted successfully!",
+  //               style: const TextStyle(fontWeight: FontWeight.bold),
+  //             ),
+  //             const SizedBox(height: 16),
+  //             Text(
+  //               "Total Score: ${response.totalScore?.toStringAsFixed(2) ?? '0'}",
+  //             ),
+  //             Text("Survey: ${response.surveyTitle}"),
+  //             Text("Response ID: ${response.responseId}"),
+  //             const SizedBox(height: 16),
+  //             if (response.submittedQuestions != null)
+  //               Column(
+  //                 crossAxisAlignment: CrossAxisAlignment.start,
+  //                 children: [
+  //                   const Text(
+  //                     "Question Results:",
+  //                     style: TextStyle(fontWeight: FontWeight.bold),
+  //                   ),
+  //                   const SizedBox(height: 8),
+  //                   ...response.submittedQuestions!
+  //                       .take(3)
+  //                       .map(
+  //                         (q) => Text(
+  //                           "• ${q.questionText}: ${q.obtainedMarks}/${q.maxMarks}",
+  //                           maxLines: 1,
+  //                           overflow: TextOverflow.ellipsis,
+  //                         ),
+  //                       ),
+  //                   if (response.submittedQuestions!.length > 3)
+  //                     Text(
+  //                       "+ ${response.submittedQuestions!.length - 3} more questions...",
+  //                     ),
+  //                 ],
+  //               ),
+  //           ],
+  //         ),
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () {
+  //             Navigator.of(context).pop();
+  //             // Navigate back to home screen
+  //             GoRouter.of(context).go(Routes.home);
+  //           },
+  //           child: const Text("OK"),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  // Replace the entire _showSuccessDialog method with this:
+  void _navigateToResultScreen(SurveySubmitResponseModel response) {
+    // Convert the API response to result screen format
+    final resultData = _convertToResultData(response);
+
+    // Navigate to ResultScreen with the response data
+    context.push(
+      Routes.result,
+      extra: {
+        'response_data': resultData,
+        'response_id': response.responseId ?? 0,
+      },
     );
+  }
+
+  Map<String, dynamic> _convertToResultData(
+    SurveySubmitResponseModel response,
+  ) {
+    // Group questions by category (you might need to adjust this based on your actual category data)
+    final categories = <String, Map<String, dynamic>>{};
+
+    if (response.submittedQuestions != null) {
+      for (var question in response.submittedQuestions!) {
+        // For simplicity, using a default category - you might want to get actual categories from your survey data
+        const categoryName = 'Survey Questions';
+
+        if (!categories.containsKey(categoryName)) {
+          categories[categoryName] = {
+            'name': categoryName,
+            'obtainedMarks': 0.0,
+            'totalMarks': 0.0,
+            'questions': [],
+          };
+        }
+
+        final category = categories[categoryName]!;
+        category['obtainedMarks'] =
+            (category['obtainedMarks'] as double) +
+            (question.obtainedMarks ?? 0);
+        category['totalMarks'] =
+            (category['totalMarks'] as double) + (question.maxMarks ?? 0);
+        (category['questions'] as List).add({
+          'question_id': question.questionId,
+          'text': question.questionText,
+          'answer': question.answer,
+          'obtainedMarks': question.obtainedMarks,
+          'maxMarks': question.maxMarks,
+          'type': question.type,
+        });
+      }
+    }
+
+    return {
+      'overall': {
+        'obtainedMarks': response.totalScore ?? 0,
+        'totalMarks':
+            response.submittedQuestions?.fold<double>(
+              0,
+              (sum, q) => sum + (q.maxMarks ?? 0),
+            ) ??
+            100,
+        'percentage': response.totalScore != null
+            ? (response.totalScore! /
+                      (response.submittedQuestions?.fold<double>(
+                            0,
+                            (sum, q) => sum + (q.maxMarks ?? 0),
+                          ) ??
+                          100)) *
+                  100
+            : 0,
+      },
+      'categories': categories.values.toList(),
+      'siteCode': response.siteCode ?? widget.siteCode,
+      'siteName': 'Survey Site',
+      'timestamp': DateTime.now().toIso8601String(),
+      'responseId':
+          response.responseId ?? DateTime.now().millisecondsSinceEpoch,
+      'surveyTitle': response.surveyTitle,
+      'message': response.message,
+    };
   }
 
   Widget _buildCategoryHeader(
