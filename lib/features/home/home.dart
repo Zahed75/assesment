@@ -11,14 +11,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Define Riverpod providers for state management
 final isLoadingProvider = StateProvider<bool>((ref) => true);
-final surveysProvider = StateProvider<List<SurveyData>>(
-  (ref) => [],
-); // Changed to SurveyData
+final surveysProvider = StateProvider<List<SurveyData>>((ref) => []);
 final siteCodeProvider = StateProvider<String>((ref) => 'Loading...');
+final siteNameProvider = StateProvider<String>((ref) => '');
 final errorMessageProvider = StateProvider<String?>((ref) => null);
+final selectedSiteProvider = StateProvider<Map<String, String>?>((ref) => null);
 
 // HomeScreen UI
 class HomeScreen extends ConsumerStatefulWidget {
@@ -33,20 +34,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadSiteCode();
+      _loadSelectedSite();
       _fetchSurveys();
     });
   }
 
-  // Load site code from storage (or just use a placeholder)
-  void _loadSiteCode() {
-    final siteCode = 'D011'; // Placeholder for the site code
-    ref.read(siteCodeProvider.notifier).state = siteCode;
+  // Load selected site from storage
+  Future<void> _loadSelectedSite() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final siteCode = prefs.getString('selected_site');
+      final siteName = prefs.getString('selected_site_name');
+
+      if (siteCode != null && siteName != null) {
+        ref.read(siteCodeProvider.notifier).state = siteCode;
+        ref.read(siteNameProvider.notifier).state = siteName;
+        ref.read(selectedSiteProvider.notifier).state = {
+          'site_code': siteCode,
+          'name': siteName,
+        };
+      } else {
+        ref.read(siteCodeProvider.notifier).state = 'Select Site';
+        ref.read(siteNameProvider.notifier).state = '';
+      }
+    } catch (e) {
+      ref.read(siteCodeProvider.notifier).state = 'Select Site';
+    }
   }
 
   // Fetch surveys from API
   Future<void> _fetchSurveys() async {
     final surveyApi = ref.read(surveyApiProvider);
+    final selectedSite = ref.read(selectedSiteProvider);
 
     ref.read(isLoadingProvider.notifier).state = true;
     ref.read(errorMessageProvider.notifier).state = null;
@@ -55,7 +74,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       final surveyList = await surveyApi.getSurveysByUser();
 
       if (surveyList.data != null && surveyList.data!.isNotEmpty) {
-        ref.read(surveysProvider.notifier).state = surveyList.data!;
+        // Filter surveys by selected site code if a site is selected
+        List<SurveyData> filteredSurveys;
+        if (selectedSite != null && selectedSite['site_code'] != null) {
+          final siteCode = selectedSite['site_code']!;
+          filteredSurveys = surveyList.data!.where((survey) {
+            return survey.siteCode == siteCode;
+          }).toList();
+        } else {
+          filteredSurveys = surveyList.data!;
+        }
+
+        ref.read(surveysProvider.notifier).state = filteredSurveys;
       } else {
         ref.read(surveysProvider.notifier).state = [];
       }
@@ -64,7 +94,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       // Show error alert
       WidgetsBinding.instance.addPostFrameCallback((_) {
         UAlert.show(
-          // Fixed UAlert reference
           title: 'Error',
           message:
               'Failed to load surveys: ${e.toString().replaceAll('Exception: ', '')}',
@@ -78,28 +107,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // Handle site selection
   Future<void> _openSiteLocation() async {
-    await Navigator.push(
+    final selectedSite = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => const SiteLocation(isSelectionMode: true),
       ),
     );
-  }
 
-  // lib/features/home/home.dart
+    if (selectedSite != null && selectedSite is Map<String, String>) {
+      // Save selected site to shared preferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('selected_site', selectedSite['site_code']!);
+      await prefs.setString('selected_site_name', selectedSite['name']!);
+
+      // Update providers
+      ref.read(siteCodeProvider.notifier).state = selectedSite['site_code']!;
+      ref.read(siteNameProvider.notifier).state = selectedSite['name']!;
+      ref.read(selectedSiteProvider.notifier).state = selectedSite;
+
+      // Refresh surveys for the selected site
+      _fetchSurveys();
+    }
+  }
 
   void _onStartSurvey(SurveyData survey) {
     // Pass the selected survey data to QuestionScreen
-    context.go(
-      Routes.question, // Navigate to the question route
-      extra: survey.toJson(), // Pass the surveyData as extra
-    );
+    context.go(Routes.question, extra: survey.toJson());
   }
 
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(isLoadingProvider);
     final siteCode = ref.watch(siteCodeProvider);
+    final siteName = ref.watch(siteNameProvider);
     final surveys = ref.watch(surveysProvider);
     final errorMessage = ref.watch(errorMessageProvider);
 
@@ -110,12 +150,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // Show error message if exists
     if (errorMessage != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        UAlert.show(
-          // Fixed UAlert reference
-          title: 'Error',
-          message: errorMessage,
-          context: context,
-        );
+        UAlert.show(title: 'Error', message: errorMessage, context: context);
         ref.read(errorMessageProvider.notifier).state = null;
       });
     }
@@ -145,7 +180,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   GestureDetector(
                     onTap: _openSiteLocation,
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 120),
@@ -159,12 +195,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ),
                           ),
                         ),
-                        const SizedBox(width: 4),
-                        const Icon(
-                          Iconsax.arrow_down_1,
-                          color: UColors.primary,
-                          size: 18,
-                        ),
+                        if (siteName.isNotEmpty)
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 120),
+                            child: Text(
+                              siteName,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodySmall!
+                                  .copyWith(color: UColors.darkGrey),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -196,9 +236,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 children: [
                                   const SizedBox(height: 120),
                                   Center(
-                                    child: Text(
-                                      'No surveys available.',
-                                      style: TextStyle(color: subtitleColor),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          'No surveys available',
+                                          style: TextStyle(
+                                            color: subtitleColor,
+                                          ),
+                                        ),
+                                        if (siteCode != 'Select Site')
+                                          Text(
+                                            'for site: $siteCode',
+                                            style: TextStyle(
+                                              color: subtitleColor,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        const SizedBox(height: 16),
+                                        ElevatedButton(
+                                          onPressed: _openSiteLocation,
+                                          child: const Text('Change Site'),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
