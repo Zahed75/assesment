@@ -1,99 +1,58 @@
-// lib/app/my_app.dart
-import 'dart:async';
-import 'dart:io';
-import 'package:assesment/core/theme/theme.dart';
-import 'package:assesment/core/theme/theme_notifier.dart';
-import 'package:assesment/features/onBoarding/onBoarding.dart';
+// // lib/app/my_app.dart (Simpler version using authStateProvider)
+// import 'dart:io';
+// import 'package:assesment/core/storage/storage_keys.dart';
+// import 'package:assesment/core/storage/storage_service.dart';
+// import 'package:assesment/core/theme/theme.dart';
+// import 'package:assesment/core/theme/theme_notifier.dart';
+// import 'package:assesment/features/onBoarding/onBoarding.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:permission_handler/permission_handler.dart';
+// import 'package:assesment/navigation_menu.dart';
 
-import 'package:assesment/navigation_menu.dart';
+// import 'package:assesment/features/auth/provider/auth_state_provider.dart'; // Add this
+// import 'package:assesment/features/signin/signin.dart';
 
-import '../core/storage/storage_keys.dart';
-import '../core/storage/storage_service.dart';
-import 'features/signin/signin.dart';
+// // Onboarding flag
+// final seenOnboardingProvider = Provider<bool>((ref) {
+//   final prefs = ref.read(sharedPrefsProvider);
+//   return prefs.getBool(StorageKeys.onboardingSeen) ?? false;
+// });
 
-// === Auth status from token in storage ===
-final isLoggedInProvider = FutureProvider<bool>((ref) async {
-  final prefs = ref.read(sharedPrefsProvider);
-  final token = prefs.getString(StorageKeys.token);
-  return token != null && token.isNotEmpty;
-});
+// class MyApp extends ConsumerWidget {
+//   const MyApp({super.key});
 
-// Onboarding flag
-final seenOnboardingProvider = Provider<bool>((ref) {
-  final prefs = ref.read(sharedPrefsProvider);
-  return prefs.getBool(StorageKeys.onboardingSeen) ?? false;
-});
+//   @override
+//   Widget build(BuildContext context, WidgetRef ref) {
+//     final themeMode = ref.watch(themeModeProvider);
 
-class MyApp extends ConsumerWidget {
-  const MyApp({super.key});
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       theme: UAppTheme.lightTheme,
+//       darkTheme: UAppTheme.darkTheme,
+//       themeMode: themeMode,
+//       home: const _AppRoot(),
+//     );
+//   }
+// }
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Watch theme mode from Riverpod
-    final themeMode = ref.watch(themeModeProvider);
+// class _AppRoot extends ConsumerStatefulWidget {
+//   const _AppRoot();
+//   @override
+//   ConsumerState<_AppRoot> createState() => _AppRootState();
+// }
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: UAppTheme.lightTheme,
-      darkTheme: UAppTheme.darkTheme,
-      themeMode: themeMode, // Use the theme mode directly from Riverpod
-      home: const _AppRoot(),
-    );
-  }
-}
+// class _AppRoot extends ConsumerWidget {
+//   const _AppRoot({super.key});
 
-class _AppRoot extends ConsumerStatefulWidget {
-  const _AppRoot();
-  @override
-  ConsumerState<_AppRoot> createState() => _AppRootState();
-}
+//   @override
+//   Widget build(BuildContext context, WidgetRef ref) {
+//     final seenOnboarding = ref.watch(seenOnboardingProvider);
+//     if (!seenOnboarding) {
+//       return const OnboardingScreen();
+//     }
 
-class _AppRootState extends ConsumerState<_AppRoot> {
-  Future<void> _requestStartupPermissions() async {
-    final toRequest = <Permission>[
-      if (Platform.isAndroid) Permission.notification,
-      // Ask other permissions just-in-time on the screen that needs them
-      // Permission.camera,
-      // Permission.location,
-    ];
-    for (final p in toRequest) {
-      await p.request();
-      await Future.delayed(const Duration(milliseconds: 80));
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Show first frame asap, then do async stuff
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      FlutterNativeSplash.remove();
-
-      // fire-and-forget tasks
-      unawaited(_requestStartupPermissions());
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final seenOnboarding = ref.watch(seenOnboardingProvider);
-    if (!seenOnboarding) {
-      return const OnboardingScreen();
-    }
-
-    final isLoggedInAsync = ref.watch(isLoggedInProvider);
-    return isLoggedInAsync.when(
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (_, __) => const LoginScreen(),
-      data: (isLoggedIn) =>
-          isLoggedIn ? const NavigationMenu() : const LoginScreen(),
-    );
-  }
-}
+//     final isLoggedIn = ref.watch(authProvider);
+//     return isLoggedIn ? const NavigationMenu() : const LoginScreen();
+//   }
+// }

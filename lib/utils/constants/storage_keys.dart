@@ -1,6 +1,7 @@
 /// utils/constants/storage_keys.dart
 class StorageKeys {
   static const String onboardingSeen = 'onboardingSeen';
+  static const token = 'auth_token';
   static const selectedSiteCode = 'selected_site_code';
 
   static const accessToken = 'access_token';

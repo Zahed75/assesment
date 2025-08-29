@@ -3,6 +3,7 @@
 class Routes {
   static const String onboarding = '/onboarding';
   static const String signIn = '/sign-in';
+  static const splash = '/splash';
   static const String otpVerify = '/otp-verify';
   static const String home = '/home';
   static const String dashboard = '/dashboard';

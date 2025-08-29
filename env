@@ -1,6 +1,0 @@
-# Android emulator example
-flutter run -d emulator \
-  --dart-define=ENV=dev \
-  --dart-define=SURVEY_BASE_URL=http://10.0.2.2:8000
-
-

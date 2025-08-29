@@ -17,7 +17,6 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   # UTILITIES
-  flutter_native_splash: ^2.4.4
   lottie: ^3.3.1
   smooth_page_indicator: ^1.2.0+3
   iconsax: ^0.0.8
@@ -51,6 +50,7 @@ dependencies:
   android_intent_plus: ^5.3.1
   flutter_riverpod: ^2.6.1
   email_validator: ^3.0.0
+  jwt_decoder: ^2.0.1
 
 
 

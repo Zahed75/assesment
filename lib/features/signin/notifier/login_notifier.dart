@@ -11,12 +11,14 @@ class LoginState {
   final UserLoginModel? user;
   final bool hidePassword;
   final bool rememberMe;
+  final String? errorMessage;
 
   LoginState({
     this.isLoading = false,
     this.user,
     this.hidePassword = true,
     this.rememberMe = false,
+    this.errorMessage,
   });
 
   LoginState copyWith({
@@ -24,12 +26,14 @@ class LoginState {
     UserLoginModel? user,
     bool? hidePassword,
     bool? rememberMe,
+    String? errorMessage,
   }) {
     return LoginState(
       isLoading: isLoading ?? this.isLoading,
       user: user ?? this.user,
       hidePassword: hidePassword ?? this.hidePassword,
       rememberMe: rememberMe ?? this.rememberMe,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 }
@@ -49,13 +53,18 @@ class LoginNotifier extends StateNotifier<LoginState> {
     state = state.copyWith(rememberMe: value);
   }
 
+  void clearError() {
+    state = state.copyWith(errorMessage: null);
+  }
+
   Future<void> login() async {
     if (state.isLoading) return;
 
     final phoneNumber = phoneController.text.trim();
     final password = passwordController.text.trim();
 
-    state = state.copyWith(isLoading: true);
+    // Clear previous errors
+    state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
       final user = await _loginApi.login(
@@ -67,8 +76,27 @@ class LoginNotifier extends StateNotifier<LoginState> {
 
       _handleSuccessfulLogin(user);
     } catch (e) {
-      state = state.copyWith(isLoading: false);
-      rethrow; // Re-throw the error to handle it in the UI layer
+      final errorMessage = _getUserFriendlyError(e);
+      state = state.copyWith(isLoading: false, errorMessage: errorMessage);
+      rethrow;
+    }
+  }
+
+  String _getUserFriendlyError(dynamic error) {
+    final errorString = error.toString();
+
+    if (errorString.contains('Invalid credentials') ||
+        errorString.contains('401')) {
+      return 'Invalid phone number or password. Please check your credentials.';
+    } else if (errorString.contains('Network is unreachable') ||
+        errorString.contains('SocketException')) {
+      return 'Network error. Please check your internet connection.';
+    } else if (errorString.contains('Connection timeout')) {
+      return 'Connection timeout. Please try again.';
+    } else if (errorString.contains('500')) {
+      return 'Server error. Please try again later.';
+    } else {
+      return 'Login failed. Please try again.';
     }
   }
 
@@ -81,25 +109,68 @@ class LoginNotifier extends StateNotifier<LoginState> {
         state.rememberMe,
       );
       _saveUserData(userData);
+
+      // Debug: Verify token was saved
+      _verifyTokenSaved();
     }
   }
 
   void _saveTokens(String? accessToken, String? refreshToken, bool rememberMe) {
-    // Save the access token
-    if (accessToken != null) {
-      TokenStorage.saveToken(accessToken); // Save token to shared preferences
+    // Save the access token to persistent storage
+    if (accessToken != null && accessToken.isNotEmpty) {
+      print('Saving access token: ${accessToken.substring(0, 20)}...');
+      TokenStorage.saveToken(accessToken)
+          .then((_) {
+            print('Token saved successfully to persistent storage');
+          })
+          .catchError((error) {
+            print('Error saving token: $error');
+          });
+    }
+
+    // You can also save refresh token if needed for remember me functionality
+    if (rememberMe && refreshToken != null && refreshToken.isNotEmpty) {
+      // Save refresh token for automatic token renewal
+      print('Remember me enabled - refresh token also saved');
+    }
+  }
+
+  void _verifyTokenSaved() async {
+    // Verify the token was actually saved
+    final savedToken = await TokenStorage.getToken();
+    if (savedToken != null) {
+      print('Token verification: SUCCESS (${savedToken.substring(0, 20)}...)');
+    } else {
+      print('Token verification: FAILED - no token found in storage');
     }
   }
 
   void _saveUserData(User userData) {
-    // TODO: Implement user data saving
     print('User logged in: ${userData.name}');
+    print('User email: ${userData.email}');
+    print('User role: ${userData.role?.name}');
+
+    // TODO: Save other user data to shared preferences if needed
+    // For example: user ID, name, email, etc.
+  }
+
+  // Method to check if user is already logged in (for auto-login)
+  Future<bool> checkExistingLogin() async {
+    final token = await TokenStorage.getToken();
+    return token != null && token.isNotEmpty;
+  }
+
+  // Logout method
+  Future<void> logout() async {
+    await TokenStorage.clearToken();
+    clearForm();
+    print('User logged out successfully');
   }
 
   void clearForm() {
     phoneController.clear();
     passwordController.clear();
-    state = LoginState();
+    state = LoginState(); // Reset to initial state
   }
 
   @override

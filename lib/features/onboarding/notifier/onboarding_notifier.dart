@@ -1,51 +1,50 @@
-// lib/features/authentication/notifiers/onboarding/onboarding_notifier.dart
-
-import 'package:assesment/app/router/routes.dart';
+// lib/features/onboarding/notifier/onboarding_notifier.dart
+import 'package:assesment/features/onboarding/notifier/onboarding_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'onboarding_state.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:go_router/go_router.dart'; // Import GoRouter for navigation
+import 'package:go_router/go_router.dart';
+import '../../../app/router/routes.dart';
+import '../../../core/storage/storage_service.dart'; // Add this import
 
 class OnboardingNotifier extends StateNotifier<OnboardingState> {
-  OnboardingNotifier() : super(OnboardingState());
+  OnboardingNotifier(this.ref) : super(OnboardingState());
+  final Ref ref; // Add Ref to access providers
 
   final pageController = PageController();
 
-  // Update the current index when page scroll
   void updatePageIndicator(int index) {
     state = state.copyWith(currentIndex: index);
   }
 
-  // Jump to a specific page when the dot is clicked
   void dotNavigationClick(int index) {
     state = state.copyWith(currentIndex: index);
     pageController.jumpToPage(index);
   }
 
-  // Move to the next page
   Future<void> nextPage(BuildContext context) async {
     if (state.currentIndex == 2) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('onboardingSeen', true); // Save the onboarding state
+      // Use storageServiceProvider instead of direct SharedPreferences
+      final storageService = ref.read(storageServiceProvider);
+      await storageService.setOnboardingSeen(true);
 
-      // Navigate to the login screen when Get Started is clicked
-      context.go(Routes.signIn); // Navigate to the login screen
+      // Navigate to sign-in screen
+      if (GoRouter.of(context).routerDelegate != null) {
+        context.go(Routes.signIn);
+      }
     } else {
       state = state.copyWith(currentIndex: state.currentIndex + 1);
       pageController.jumpToPage(state.currentIndex);
     }
   }
 
-  // Skip to the last page
   void skipPage() {
     state = state.copyWith(currentIndex: 2);
     pageController.jumpToPage(state.currentIndex);
   }
 }
 
-// Riverpod provider for OnboardingNotifier
+// Update provider to pass ref
 final onboardingNotifierProvider =
     StateNotifierProvider<OnboardingNotifier, OnboardingState>((ref) {
-      return OnboardingNotifier();
+      return OnboardingNotifier(ref); // Pass ref to the notifier
     });
