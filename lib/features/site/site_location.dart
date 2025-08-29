@@ -139,8 +139,11 @@ class SiteLocation extends ConsumerWidget {
                             'name': siteName,
                           };
 
-                          // Save selected site
-                          await saveSelectedSite(selectedSite);
+                          // Save selected site to shared preferences - FIXED
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setString('selected_site', siteCode);
+                          await prefs.setString('selected_site_name', siteName);
+
                           ref.read(selectedSiteProvider.notifier).state =
                               selectedSite;
 
@@ -156,7 +159,7 @@ class SiteLocation extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withValues(alpha: 0.5),
                                 blurRadius: 4,
                                 offset: const Offset(1, 2),
                               ),
