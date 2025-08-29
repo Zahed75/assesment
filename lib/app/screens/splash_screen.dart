@@ -24,7 +24,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     final storageService = ref.read(storageServiceProvider);
 
     // Add a small delay for splash screen
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(milliseconds: 30));
 
     try {
       // Get the auth state provider and await its result properly

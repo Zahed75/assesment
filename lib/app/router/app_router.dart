@@ -45,12 +45,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const NavigationMenu(),
       ),
       GoRoute(
-        path: '/question', // Must start with /
+        path: Routes.question,
         name: Routes.question,
         builder: (context, state) {
-          final surveyData = state.extra as Map<String, dynamic>? ?? {};
-          final siteCode = state.queryParams['siteCode'] ?? '';
-          return QuestionScreen(surveyData: surveyData, siteCode: siteCode);
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          return QuestionScreen(
+            surveyData: extra['survey_data'] ?? {},
+            siteCode: extra['site_code'] ?? '',
+          );
         },
       ),
       GoRoute(

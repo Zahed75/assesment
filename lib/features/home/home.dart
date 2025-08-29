@@ -131,8 +131,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _onStartSurvey(SurveyData survey) {
-    // Pass the selected survey data to QuestionScreen
-    context.go(Routes.question, extra: survey.toJson());
+    final selectedSite = ref.read(selectedSiteProvider);
+    final siteCode =
+        selectedSite?['site_code'] ?? ''; // Get site code from provider
+
+    // Pass the selected survey data AND site code to QuestionScreen
+    context.go(
+      Routes.question,
+      extra: {'survey_data': survey.toJson(), 'site_code': siteCode},
+    );
   }
 
   @override
@@ -178,33 +185,46 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       color: UColors.warning,
                     ),
                   ),
+                  // Alternative: Icon on the right side
                   GestureDetector(
                     onTap: _openSiteLocation,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    child: Row(
                       children: [
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 120),
-                          child: Text(
-                            siteCode,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleMedium!
-                                .copyWith(
-                                  color: UColors.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                        ),
-                        if (siteName.isNotEmpty)
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 120),
-                            child: Text(
-                              siteName,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodySmall!
-                                  .copyWith(color: UColors.darkGrey),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 100),
+                              child: Text(
+                                siteCode,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.titleMedium!
+                                    .copyWith(
+                                      color: UColors.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
                             ),
-                          ),
+                            if (siteName.isNotEmpty)
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 100,
+                                ),
+                                child: Text(
+                                  siteName,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.bodySmall!
+                                      .copyWith(color: UColors.darkGrey),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(width: 6),
+                        Icon(
+                          Iconsax.location, // Location icon
+                          size: 18,
+                          color: UColors.primary,
+                        ),
                       ],
                     ),
                   ),
