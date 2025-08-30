@@ -57,6 +57,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       // In your app_router.dart, the result route should look like this:
+      // lib/app/router/app_router.dart
+      // In your result route builder
       GoRoute(
         path: '/result',
         name: Routes.result,
@@ -69,11 +71,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           print('🔄 Navigating to result screen with responseId: $responseId');
 
           if (responseId == null || responseId == 0) {
-            // Handle invalid response ID
-            return Scaffold(
-              body: Center(
-                child: Text('Invalid survey response ID: $responseIdString'),
-              ),
+            // If invalid response ID, go back to home and show error
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              context.goNamed(Routes.home);
+              // You could show a snackbar or dialog here if needed
+            });
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
             );
           }
 

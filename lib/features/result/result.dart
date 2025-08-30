@@ -2,6 +2,7 @@
 import 'package:assesment/app/router/routes.dart';
 import 'package:assesment/features/result/model/survey_result_model.dart';
 import 'package:assesment/features/result/notifier/result_notifier.dart';
+import 'package:assesment/features/result/provider/responseId_provider.dart';
 import 'package:assesment/features/result/widgets/all_question_tab.dart';
 import 'package:assesment/features/result/widgets/result_header.dart';
 import 'package:assesment/features/result/widgets/summary_tab.dart';
@@ -34,6 +35,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   Future<void> _fetchResult(WidgetRef ref) async {
     final notifier = ref.read(resultNotifierProvider.notifier);
     await notifier.fetchSurveyResult(widget.responseId);
+    ref.read(latestResponseIdProvider.notifier).state = widget.responseId;
   }
 
   // Helper methods to process API data

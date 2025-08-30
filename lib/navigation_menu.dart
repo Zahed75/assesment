@@ -2,10 +2,11 @@
 import 'package:assesment/features/dashboard/dashboard.dart';
 import 'package:assesment/features/home/home.dart';
 import 'package:assesment/features/profile/profile.dart';
-import 'package:assesment/features/result/result.dart';
+import 'package:assesment/features/result/result.dart'; // Keep this import
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:assesment/features/result/provider/responseId_provider.dart'; // Add this import
 
 final selectedIndexProvider = StateProvider<int>((ref) => 0);
 
@@ -16,6 +17,9 @@ class NavigationMenu extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final index = ref.watch(selectedIndexProvider);
+    final latestResponseId = ref.watch(
+      latestResponseIdProvider,
+    ); // Get latest response ID
 
     Widget body;
     switch (index) {
@@ -23,7 +27,31 @@ class NavigationMenu extends ConsumerWidget {
         body = const HomeScreen();
         break;
       case 1:
-        body = const ResultScreen(responseId: 0); // ⬅️ pass dummy id for now
+        // Show ResultScreen if we have a latest response ID, otherwise show placeholder
+        body = latestResponseId != null && latestResponseId > 0
+            ? ResultScreen(responseId: latestResponseId)
+            : const Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.history, size: 64, color: Colors.grey),
+                    SizedBox(height: 16),
+                    Text(
+                      'Survey History',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Complete surveys to see your history here',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                ),
+              );
         break;
       case 2:
         body = const DashboardScreen();
@@ -51,8 +79,8 @@ class NavigationMenu extends ConsumerWidget {
                 color: dark ? Colors.black12 : Colors.grey[100],
                 border: Border.all(
                   color: dark
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : Colors.black.withValues(alpha: 0.05),
+                      ? Colors.white.withOpacity(0.05)
+                      : Colors.black.withOpacity(0.05),
                 ),
               ),
               child: NavigationBar(
@@ -60,12 +88,14 @@ class NavigationMenu extends ConsumerWidget {
                 elevation: 0,
                 backgroundColor: dark ? Colors.black12 : Colors.grey[100],
                 indicatorColor: dark
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : Colors.black.withValues(alpha: 0.08),
+                    ? Colors.white.withOpacity(0.08)
+                    : Colors.black.withOpacity(0.08),
                 labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
                 selectedIndex: index,
-                onDestinationSelected: (i) =>
-                    ref.read(selectedIndexProvider.notifier).state = i,
+                onDestinationSelected: (i) {
+                  ref.read(selectedIndexProvider.notifier).state = i;
+                  // Don't clear the latest response ID when switching tabs
+                },
                 destinations: const [
                   NavigationDestination(
                     icon: Icon(Iconsax.home),

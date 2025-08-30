@@ -2,6 +2,7 @@ import 'package:assesment/app/router/routes.dart';
 import 'package:assesment/common_ui/widgets/alerts/u_alert.dart';
 import 'package:assesment/features/question/model/survey_submit_model.dart';
 import 'package:assesment/features/question/provider/survey_submit_provider.dart';
+import 'package:assesment/features/result/provider/responseId_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:go_router/go_router.dart';
@@ -299,76 +300,8 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
     }
   }
 
-  // Add this method to show success dialog with results
-  // void _showSuccessDialog(SurveySubmitResponseModel response) {
-  //   showDialog(
-  //     context: context,
-  //     barrierDismissible: false,
-  //     builder: (context) => AlertDialog(
-  //       title: const Row(
-  //         children: [
-  //           Icon(Icons.check_circle, color: Colors.green),
-  //           SizedBox(width: 8),
-  //           Text("Survey Submitted"),
-  //         ],
-  //       ),
-  //       content: SingleChildScrollView(
-  //         child: Column(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: [
-  //             Text(
-  //               response.message ?? "Survey submitted successfully!",
-  //               style: const TextStyle(fontWeight: FontWeight.bold),
-  //             ),
-  //             const SizedBox(height: 16),
-  //             Text(
-  //               "Total Score: ${response.totalScore?.toStringAsFixed(2) ?? '0'}",
-  //             ),
-  //             Text("Survey: ${response.surveyTitle}"),
-  //             Text("Response ID: ${response.responseId}"),
-  //             const SizedBox(height: 16),
-  //             if (response.submittedQuestions != null)
-  //               Column(
-  //                 crossAxisAlignment: CrossAxisAlignment.start,
-  //                 children: [
-  //                   const Text(
-  //                     "Question Results:",
-  //                     style: TextStyle(fontWeight: FontWeight.bold),
-  //                   ),
-  //                   const SizedBox(height: 8),
-  //                   ...response.submittedQuestions!
-  //                       .take(3)
-  //                       .map(
-  //                         (q) => Text(
-  //                           "• ${q.questionText}: ${q.obtainedMarks}/${q.maxMarks}",
-  //                           maxLines: 1,
-  //                           overflow: TextOverflow.ellipsis,
-  //                         ),
-  //                       ),
-  //                   if (response.submittedQuestions!.length > 3)
-  //                     Text(
-  //                       "+ ${response.submittedQuestions!.length - 3} more questions...",
-  //                     ),
-  //                 ],
-  //               ),
-  //           ],
-  //         ),
-  //       ),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () {
-  //             Navigator.of(context).pop();
-  //             // Navigate back to home screen
-  //             GoRouter.of(context).go(Routes.home);
-  //           },
-  //           child: const Text("OK"),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
+  // In your QuestionScreen's _navigateToResultScreen method
+  // In your QuestionScreen's _navigateToResultScreen method
   void _navigateToResultScreen(SurveySubmitResponseModel response) {
     if (response.responseId == null || response.responseId == 0) {
       print('❌ Invalid responseId: ${response.responseId}');
@@ -386,79 +319,15 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
       '✅ Navigating to result screen with responseId: ${response.responseId}',
     );
 
-    // Navigate to ResultScreen with responseId as query parameter
+    // Store the latest response ID
+    ref.read(latestResponseIdProvider.notifier).state = response.responseId;
+
+    // Navigate to ResultScreen
     context.pushNamed(
       Routes.result,
       queryParams: {'responseId': response.responseId.toString()},
     );
   }
-
-  // Map<String, dynamic> _convertToResultData(
-  //   SurveySubmitResponseModel response,
-  // ) {
-  //   // Group questions by category (you might need to adjust this based on your actual category data)
-  //   final categories = <String, Map<String, dynamic>>{};
-
-  //   if (response.submittedQuestions != null) {
-  //     for (var question in response.submittedQuestions!) {
-  //       // For simplicity, using a default category - you might want to get actual categories from your survey data
-  //       const categoryName = 'Survey Questions';
-
-  //       if (!categories.containsKey(categoryName)) {
-  //         categories[categoryName] = {
-  //           'name': categoryName,
-  //           'obtainedMarks': 0.0,
-  //           'totalMarks': 0.0,
-  //           'questions': [],
-  //         };
-  //       }
-
-  //       final category = categories[categoryName]!;
-  //       category['obtainedMarks'] =
-  //           (category['obtainedMarks'] as double) +
-  //           (question.obtainedMarks ?? 0);
-  //       category['totalMarks'] =
-  //           (category['totalMarks'] as double) + (question.maxMarks ?? 0);
-  //       (category['questions'] as List).add({
-  //         'question_id': question.questionId,
-  //         'text': question.questionText,
-  //         'answer': question.answer,
-  //         'obtainedMarks': question.obtainedMarks,
-  //         'maxMarks': question.maxMarks,
-  //         'type': question.type,
-  //       });
-  //     }
-  //   }
-
-  //   return {
-  //     'overall': {
-  //       'obtainedMarks': response.totalScore ?? 0,
-  //       'totalMarks':
-  //           response.submittedQuestions?.fold<double>(
-  //             0,
-  //             (sum, q) => sum + (q.maxMarks ?? 0),
-  //           ) ??
-  //           100,
-  //       'percentage': response.totalScore != null
-  //           ? (response.totalScore! /
-  //                     (response.submittedQuestions?.fold<double>(
-  //                           0,
-  //                           (sum, q) => sum + (q.maxMarks ?? 0),
-  //                         ) ??
-  //                         100)) *
-  //                 100
-  //           : 0,
-  //     },
-  //     'categories': categories.values.toList(),
-  //     'siteCode': response.siteCode ?? widget.siteCode,
-  //     'siteName': 'Survey Site',
-  //     'timestamp': DateTime.now().toIso8601String(),
-  //     'responseId':
-  //         response.responseId ?? DateTime.now().millisecondsSinceEpoch,
-  //     'surveyTitle': response.surveyTitle,
-  //     'message': response.message,
-  //   };
-  // }
 
   Widget _buildCategoryHeader(
     String category,
