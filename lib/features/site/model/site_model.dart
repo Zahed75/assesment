@@ -5,7 +5,7 @@ class SiteListModel {
   int? pageSize;
   int? numPages;
   String? next;
-  Null? previous;
+  Null previous;
   List<Sites>? sites;
 
   SiteListModel({
@@ -30,22 +30,22 @@ class SiteListModel {
     if (json['sites'] != null) {
       sites = <Sites>[];
       json['sites'].forEach((v) {
-        sites!.add(new Sites.fromJson(v));
+        sites!.add(Sites.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['message'] = this.message;
-    data['count'] = this.count;
-    data['page'] = this.page;
-    data['page_size'] = this.pageSize;
-    data['num_pages'] = this.numPages;
-    data['next'] = this.next;
-    data['previous'] = this.previous;
-    if (this.sites != null) {
-      data['sites'] = this.sites!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['message'] = message;
+    data['count'] = count;
+    data['page'] = page;
+    data['page_size'] = pageSize;
+    data['num_pages'] = numPages;
+    data['next'] = next;
+    data['previous'] = previous;
+    if (sites != null) {
+      data['sites'] = sites!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -65,10 +65,10 @@ class Sites {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['site_code'] = this.siteCode;
-    data['name'] = this.name;
-    data['address'] = this.address;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['site_code'] = siteCode;
+    data['name'] = name;
+    data['address'] = address;
     return data;
   }
 }

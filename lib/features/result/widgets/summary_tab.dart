@@ -11,15 +11,18 @@ class SummaryTab extends StatefulWidget {
     required this.qType,
     required this.qText,
     required this.qAnswer,
+    required this.qObtainedMarks,
+    required this.qMaxMarks,
   });
 
   final bool isDark;
   final List<Map<String, dynamic>> categories;
   final String feedback;
-
   final String Function(dynamic) qType;
   final String Function(dynamic) qText;
   final String Function(dynamic) qAnswer;
+  final double Function(dynamic) qObtainedMarks;
+  final double Function(dynamic) qMaxMarks;
 
   @override
   State<SummaryTab> createState() => _SummaryTabState();
@@ -190,8 +193,8 @@ class _SummaryTabState extends State<SummaryTab> {
         final q = qEntry.value;
         final text = widget.qText(q);
         final answer = widget.qAnswer(q);
-        final obtainedMarks = (q['obtainedMarks'] as num?)?.toDouble() ?? 0;
-        final maxMarks = (q['maxMarks'] as num?)?.toDouble() ?? 0;
+        final obtainedMarks = widget.qObtainedMarks(q);
+        final maxMarks = widget.qMaxMarks(q);
         final questionPercent = maxMarks > 0 ? obtainedMarks / maxMarks : 0.0;
 
         return Container(
@@ -235,8 +238,11 @@ class _SummaryTabState extends State<SummaryTab> {
                       ),
                     ),
                     const SizedBox(height: 4),
+                    // In your summary_tab.dart, ensure the answer display handles any type
                     Text(
-                      answer,
+                      widget.qAnswer(
+                        q,
+                      ), // This will call toString() on any type
                       style: textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurface.withOpacity(0.7),
                       ),

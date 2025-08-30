@@ -280,7 +280,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
         questionResponses: questionResponses,
         imagePaths: imageFiles,
       );
-
+      print('✅ Submission successful! Response: ${response.toJson()}');
       // Handle successful submission
       _navigateToResultScreen(response);
     } catch (e) {
@@ -369,87 +369,96 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
   //   );
   // }
 
-  // Replace the entire _showSuccessDialog method with this:
   void _navigateToResultScreen(SurveySubmitResponseModel response) {
-    // Convert the API response to result screen format
-    final resultData = _convertToResultData(response);
+    if (response.responseId == null || response.responseId == 0) {
+      print('❌ Invalid responseId: ${response.responseId}');
+      UAlert.show(
+        title: "Submission Error",
+        message: "Failed to get valid response ID from server",
+        icon: Icons.error_outline,
+        iconColor: Colors.redAccent,
+        context: context,
+      );
+      return;
+    }
 
-    // Navigate to ResultScreen with the response data
-    context.push(
+    print(
+      '✅ Navigating to result screen with responseId: ${response.responseId}',
+    );
+
+    // Navigate to ResultScreen with responseId as query parameter
+    context.pushNamed(
       Routes.result,
-      extra: {
-        'response_data': resultData,
-        'response_id': response.responseId ?? 0,
-      },
+      queryParams: {'responseId': response.responseId.toString()},
     );
   }
 
-  Map<String, dynamic> _convertToResultData(
-    SurveySubmitResponseModel response,
-  ) {
-    // Group questions by category (you might need to adjust this based on your actual category data)
-    final categories = <String, Map<String, dynamic>>{};
+  // Map<String, dynamic> _convertToResultData(
+  //   SurveySubmitResponseModel response,
+  // ) {
+  //   // Group questions by category (you might need to adjust this based on your actual category data)
+  //   final categories = <String, Map<String, dynamic>>{};
 
-    if (response.submittedQuestions != null) {
-      for (var question in response.submittedQuestions!) {
-        // For simplicity, using a default category - you might want to get actual categories from your survey data
-        const categoryName = 'Survey Questions';
+  //   if (response.submittedQuestions != null) {
+  //     for (var question in response.submittedQuestions!) {
+  //       // For simplicity, using a default category - you might want to get actual categories from your survey data
+  //       const categoryName = 'Survey Questions';
 
-        if (!categories.containsKey(categoryName)) {
-          categories[categoryName] = {
-            'name': categoryName,
-            'obtainedMarks': 0.0,
-            'totalMarks': 0.0,
-            'questions': [],
-          };
-        }
+  //       if (!categories.containsKey(categoryName)) {
+  //         categories[categoryName] = {
+  //           'name': categoryName,
+  //           'obtainedMarks': 0.0,
+  //           'totalMarks': 0.0,
+  //           'questions': [],
+  //         };
+  //       }
 
-        final category = categories[categoryName]!;
-        category['obtainedMarks'] =
-            (category['obtainedMarks'] as double) +
-            (question.obtainedMarks ?? 0);
-        category['totalMarks'] =
-            (category['totalMarks'] as double) + (question.maxMarks ?? 0);
-        (category['questions'] as List).add({
-          'question_id': question.questionId,
-          'text': question.questionText,
-          'answer': question.answer,
-          'obtainedMarks': question.obtainedMarks,
-          'maxMarks': question.maxMarks,
-          'type': question.type,
-        });
-      }
-    }
+  //       final category = categories[categoryName]!;
+  //       category['obtainedMarks'] =
+  //           (category['obtainedMarks'] as double) +
+  //           (question.obtainedMarks ?? 0);
+  //       category['totalMarks'] =
+  //           (category['totalMarks'] as double) + (question.maxMarks ?? 0);
+  //       (category['questions'] as List).add({
+  //         'question_id': question.questionId,
+  //         'text': question.questionText,
+  //         'answer': question.answer,
+  //         'obtainedMarks': question.obtainedMarks,
+  //         'maxMarks': question.maxMarks,
+  //         'type': question.type,
+  //       });
+  //     }
+  //   }
 
-    return {
-      'overall': {
-        'obtainedMarks': response.totalScore ?? 0,
-        'totalMarks':
-            response.submittedQuestions?.fold<double>(
-              0,
-              (sum, q) => sum + (q.maxMarks ?? 0),
-            ) ??
-            100,
-        'percentage': response.totalScore != null
-            ? (response.totalScore! /
-                      (response.submittedQuestions?.fold<double>(
-                            0,
-                            (sum, q) => sum + (q.maxMarks ?? 0),
-                          ) ??
-                          100)) *
-                  100
-            : 0,
-      },
-      'categories': categories.values.toList(),
-      'siteCode': response.siteCode ?? widget.siteCode,
-      'siteName': 'Survey Site',
-      'timestamp': DateTime.now().toIso8601String(),
-      'responseId':
-          response.responseId ?? DateTime.now().millisecondsSinceEpoch,
-      'surveyTitle': response.surveyTitle,
-      'message': response.message,
-    };
-  }
+  //   return {
+  //     'overall': {
+  //       'obtainedMarks': response.totalScore ?? 0,
+  //       'totalMarks':
+  //           response.submittedQuestions?.fold<double>(
+  //             0,
+  //             (sum, q) => sum + (q.maxMarks ?? 0),
+  //           ) ??
+  //           100,
+  //       'percentage': response.totalScore != null
+  //           ? (response.totalScore! /
+  //                     (response.submittedQuestions?.fold<double>(
+  //                           0,
+  //                           (sum, q) => sum + (q.maxMarks ?? 0),
+  //                         ) ??
+  //                         100)) *
+  //                 100
+  //           : 0,
+  //     },
+  //     'categories': categories.values.toList(),
+  //     'siteCode': response.siteCode ?? widget.siteCode,
+  //     'siteName': 'Survey Site',
+  //     'timestamp': DateTime.now().toIso8601String(),
+  //     'responseId':
+  //         response.responseId ?? DateTime.now().millisecondsSinceEpoch,
+  //     'surveyTitle': response.surveyTitle,
+  //     'message': response.message,
+  //   };
+  // }
 
   Widget _buildCategoryHeader(
     String category,

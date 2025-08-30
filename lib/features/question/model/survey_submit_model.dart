@@ -53,6 +53,20 @@ class SurveySubmitResponseModel {
     data['survey_title'] = surveyTitle;
     return data;
   }
+
+  // Add this method for debugging
+  void printDebugInfo() {
+    print('📦 Survey Submission Response:');
+    print('   Message: $message');
+    print('   Response ID: $responseId');
+    print('   Total Score: $totalScore');
+    print('   Site Code: $siteCode');
+    print('   User ID: $userId');
+    print('   Survey Title: $surveyTitle');
+    if (submittedQuestions != null) {
+      print('   Submitted Questions: ${submittedQuestions!.length}');
+    }
+  }
 }
 
 class SubmittedQuestions {

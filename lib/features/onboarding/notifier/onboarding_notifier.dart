@@ -28,9 +28,7 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
       await storageService.setOnboardingSeen(true);
 
       // Navigate to sign-in screen
-      if (GoRouter.of(context).routerDelegate != null) {
-        context.go(Routes.signIn);
-      }
+      context.go(Routes.signIn);
     } else {
       state = state.copyWith(currentIndex: state.currentIndex + 1);
       pageController.jumpToPage(state.currentIndex);

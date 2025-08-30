@@ -122,10 +122,11 @@ class _AllQuestionsTabState extends State<AllQuestionsTab> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
+                        // In your all_questions_tab.dart
                         subtitle: Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
-                            'Answer: ${item['answer'] ?? ''}',
+                            'Answer: ${item['answer']?.toString() ?? ''}', // Ensure toString()
                             style: textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurface.withOpacity(
                                 0.7,

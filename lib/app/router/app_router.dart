@@ -8,6 +8,7 @@ import 'package:assesment/features/profile/profile.dart';
 import 'package:assesment/features/question/question.dart';
 import 'package:assesment/features/result/result.dart';
 import 'package:assesment/navigation_menu.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -55,15 +56,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
+      // In your app_router.dart, the result route should look like this:
       GoRoute(
-        path: '/result', // Must start with /
+        path: '/result',
         name: Routes.result,
         builder: (context, state) {
           final responseIdString = state.queryParams['responseId'];
           final responseId = responseIdString != null
               ? int.tryParse(responseIdString)
               : null;
-          return ResultScreen(responseId: responseId ?? 0);
+
+          print('🔄 Navigating to result screen with responseId: $responseId');
+
+          if (responseId == null || responseId == 0) {
+            // Handle invalid response ID
+            return Scaffold(
+              body: Center(
+                child: Text('Invalid survey response ID: $responseIdString'),
+              ),
+            );
+          }
+
+          return ResultScreen(responseId: responseId);
         },
       ),
       GoRoute(
