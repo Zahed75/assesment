@@ -82,7 +82,7 @@ class DashboardScreen extends ConsumerWidget {
                           : Colors.grey.shade300,
                       foregroundColor: isMyOutletSelected
                           ? Colors.white
-                          : Colors.black,
+                          : Colors.purple,
                     ),
                     child: const Text("My Outlets"),
                   ),

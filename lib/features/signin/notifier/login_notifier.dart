@@ -1,10 +1,11 @@
 // lib/features/signin/notifier/login_notifier.dart
+import 'package:assesment/core/storage/storage_service.dart';
 import 'package:assesment/features/signin/api/login_api.dart';
 import 'package:assesment/features/signin/model/user_login_model.dart';
 import 'package:assesment/features/signin/provider/login_provider.dart';
 import 'package:assesment/utils/constants/token_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // Import flutter_riverpod
 
 class LoginState {
   final bool isLoading;
@@ -40,10 +41,12 @@ class LoginState {
 
 class LoginNotifier extends StateNotifier<LoginState> {
   final LoginApi _loginApi;
+  final Ref _ref; // Add Ref as a class field
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  LoginNotifier(this._loginApi) : super(LoginState());
+  // Accept Ref in constructor
+  LoginNotifier(this._loginApi, this._ref) : super(LoginState());
 
   void togglePasswordVisibility() {
     state = state.copyWith(hidePassword: !state.hidePassword);
@@ -115,6 +118,7 @@ class LoginNotifier extends StateNotifier<LoginState> {
     }
   }
 
+  // lib/features/signin/notifier/login_notifier.dart - UPDATE THESE METHODS
   void _saveTokens(String? accessToken, String? refreshToken, bool rememberMe) {
     // Save the access token to persistent storage
     if (accessToken != null && accessToken.isNotEmpty) {
@@ -128,11 +132,37 @@ class LoginNotifier extends StateNotifier<LoginState> {
           });
     }
 
-    // You can also save refresh token if needed for remember me functionality
-    if (rememberMe && refreshToken != null && refreshToken.isNotEmpty) {
-      // Save refresh token for automatic token renewal
-      print('Remember me enabled - refresh token also saved');
+    // Save remember me preference
+    if (rememberMe) {
+      print('Remember me enabled - saving preference');
+      final storageService = _ref.read(storageServiceProvider);
+      storageService.setRememberMe(true);
+
+      // Also save refresh token if available for auto-login
+      if (refreshToken != null && refreshToken.isNotEmpty) {
+        print('Saving refresh token for remember me');
+        // You might want to save refresh token to secure storage
+      }
+    } else {
+      print('Remember me disabled - clearing preference');
+      final storageService = _ref.read(storageServiceProvider);
+      storageService.setRememberMe(false);
+
+      // Clear any refresh tokens if remember me is off
+      print('Clearing any refresh tokens');
     }
+  }
+
+  // Add this method to check remember me status on app start
+  Future<bool> shouldAutoLogin() async {
+    final storageService = _ref.read(storageServiceProvider);
+    final rememberMeEnabled = storageService.rememberMe;
+    final hasToken = await TokenStorage.getToken() != null;
+
+    print(
+      'Auto-login check - Remember me: $rememberMeEnabled, Has token: $hasToken',
+    );
+    return rememberMeEnabled && hasToken;
   }
 
   void _verifyTokenSaved() async {
@@ -151,7 +181,6 @@ class LoginNotifier extends StateNotifier<LoginState> {
     print('User role: ${userData.role?.name}');
 
     // TODO: Save other user data to shared preferences if needed
-    // For example: user ID, name, email, etc.
   }
 
   // Method to check if user is already logged in (for auto-login)
@@ -181,8 +210,9 @@ class LoginNotifier extends StateNotifier<LoginState> {
   }
 }
 
+// Update the provider to pass ref
 final loginControllerProvider =
     StateNotifierProvider<LoginNotifier, LoginState>((ref) {
       final loginApi = ref.watch(loginApiProvider);
-      return LoginNotifier(loginApi);
+      return LoginNotifier(loginApi, ref); // Pass ref to the notifier
     });

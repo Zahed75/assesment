@@ -1,4 +1,5 @@
 // lib/app/screens/splash_screen.dart
+import 'package:assesment/utils/constants/token_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,42 +21,46 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     _checkAuthAndNavigate();
   }
 
+  // lib/app/screens/splash_screen.dart - UPDATE SPLASH LOGIC
   Future<void> _checkAuthAndNavigate() async {
     final storageService = ref.read(storageServiceProvider);
 
-    // Add a small delay for splash screen
-    await Future.delayed(const Duration(milliseconds: 30));
+    // Add a proper delay for splash screen
+    await Future.delayed(const Duration(milliseconds: 1500));
 
     try {
-      // Get the auth state provider and await its result properly
-      final authState = ref.read(authStateProvider);
+      // Check token directly
+      final token = await TokenStorage.getToken();
+      final isLoggedIn = token != null && token.isNotEmpty;
 
-      // Use when() to handle the AsyncValue
-      authState.when(
-        data: (isLoggedIn) {
-          final seenOnboarding = storageService.onboardingSeen;
+      final seenOnboarding = storageService.onboardingSeen;
+      final rememberMeEnabled = storageService.rememberMe;
 
-          if (!context.mounted) return;
-
-          if (!seenOnboarding) {
-            context.go(Routes.onboarding);
-          } else if (isLoggedIn) {
-            context.go(Routes.home);
-          } else {
-            context.go(Routes.signIn);
-          }
-        },
-        loading: () {
-          // If still loading, wait a bit more and check again
-          Future.delayed(const Duration(seconds: 1), _checkAuthAndNavigate);
-        },
-        error: (error, stackTrace) {
-          if (!context.mounted) return;
-          context.go(Routes.signIn);
-        },
-      );
-    } catch (error) {
       if (!context.mounted) return;
+
+      print('Auth check - Token: ${token != null ? "EXISTS" : "MISSING"}');
+      print('Auth check - Onboarding seen: $seenOnboarding');
+      print('Auth check - Remember me: $rememberMeEnabled');
+
+      if (!seenOnboarding) {
+        print('Navigating to onboarding');
+        context.go(Routes.onboarding);
+      } else if (isLoggedIn) {
+        print('Navigating to home (user is logged in)');
+        context.go(Routes.home);
+      } else if (rememberMeEnabled) {
+        // Remember me is enabled but no token - this shouldn't happen
+        print('Remember me enabled but no token found. Clearing preference.');
+        await storageService.setRememberMe(false);
+        context.go(Routes.signIn);
+      } else {
+        print('Navigating to signin (user is not logged in)');
+        context.go(Routes.signIn);
+      }
+    } catch (error) {
+      print('Error in splash navigation: $error');
+      if (!context.mounted) return;
+      print('Fallback: Navigating to signin due to error');
       context.go(Routes.signIn);
     }
   }

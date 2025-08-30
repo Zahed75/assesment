@@ -2,6 +2,7 @@
 import 'package:assesment/common_ui/styles/padding.dart';
 import 'package:assesment/common_ui/widgets/alerts/u_alert.dart';
 import 'package:assesment/common_ui/widgets/button/elevated_button.dart';
+import 'package:assesment/core/storage/storage_service.dart';
 import 'package:assesment/features/forget_password/forget_password.dart';
 import 'package:assesment/features/signin/notifier/login_notifier.dart';
 import 'package:assesment/features/signin/widgets/login_form.dart';
@@ -27,9 +28,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   String appVersion = '';
   String buildNumber = '';
 
+  // In your LoginScreen, add this to initState or build method
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Check if remember me was enabled and pre-fill the checkbox
+      final storageService = ref.read(storageServiceProvider);
+      final rememberMeEnabled = storageService.rememberMe;
+
+      if (rememberMeEnabled) {
+        ref.read(loginControllerProvider.notifier).toggleRememberMe(true);
+      }
+    });
   }
 
   Future<void> _handleLogin() async {

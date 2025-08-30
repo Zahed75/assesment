@@ -17,6 +17,9 @@ class StorageService {
   // Onboarding seen
   bool get onboardingSeen => prefs.getBool('onboardingSeen') ?? false;
   Future<void> setOnboardingSeen(bool v) => prefs.setBool('onboardingSeen', v);
+  // Remember me
+  bool get rememberMe => prefs.getBool('rememberMe') ?? false;
+  Future<void> setRememberMe(bool value) => prefs.setBool('rememberMe', value);
 }
 
 final storageServiceProvider = Provider<StorageService>((ref) {

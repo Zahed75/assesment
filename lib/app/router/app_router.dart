@@ -26,8 +26,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: Routes.onboarding,
         builder: (context, state) => const OnboardingScreen(),
       ),
+      // In your app_router.dart, change the path to match Routes.signIn
       GoRoute(
-        path: '/signin', // Must start with /
+        path: '/signin', // Add hyphen to match Routes.signIn
         name: Routes.signIn,
         builder: (context, state) => const LoginScreen(),
       ),

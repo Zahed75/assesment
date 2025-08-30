@@ -1,8 +1,7 @@
 // lib/app/routes.dart
-
 class Routes {
   static const String onboarding = '/onboarding';
-  static const String signIn = '/sign-in';
+  static const String signIn = '/signin';
   static const splash = '/splash';
   static const String otpVerify = '/otp-verify';
   static const String home = '/home';
