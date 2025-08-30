@@ -6,6 +6,7 @@ import 'package:assesment/features/result/provider/responseId_provider.dart';
 import 'package:assesment/features/result/widgets/all_question_tab.dart';
 import 'package:assesment/features/result/widgets/result_header.dart';
 import 'package:assesment/features/result/widgets/summary_tab.dart';
+import 'package:assesment/navigation_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -131,6 +132,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     return Scaffold(
       backgroundColor:
           theme.scaffoldBackgroundColor, // FIX: Changed from transparent
+      // In your ResultScreen's build method, update the AppBar
       appBar: AppBar(
         title: const Text('Survey Result'),
         backgroundColor: Colors.transparent,
@@ -138,8 +140,16 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            // Navigate back to home screen
-            context.goNamed(Routes.home);
+            // Check if we're in the History tab of NavigationMenu
+            final currentRoute = GoRouter.of(context).location;
+
+            if (currentRoute == '/home') {
+              // If we're already in home (History tab), just switch to Home tab
+              ref.read(selectedIndexProvider.notifier).state = 0;
+            } else {
+              // If we're in standalone ResultScreen, navigate back to home
+              context.goNamed(Routes.home);
+            }
           },
         ),
       ),
