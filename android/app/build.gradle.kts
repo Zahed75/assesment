@@ -1,11 +1,21 @@
 // Needed for output file renaming
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
+import java.util.Properties // ← ADD THIS IMPORT
 
 plugins {
     id("com.android.application")
     id("kotlin-android")
     // Must be applied after the Android & Kotlin plugins
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// ✅ Load environment variables or use fallback values
+// Temporary hardcoded path for testing
+val keystoreProperties = Properties().apply {
+    setProperty("storePassword", "ZahedACI2025")
+    setProperty("keyPassword", "ZahedACI2025")
+    setProperty("keyAlias", "upload")
+    setProperty("storeFile", "upload-keystore.jks") 
 }
 
 android {
@@ -22,15 +32,21 @@ android {
         multiDexEnabled = true
     }
 
-    // ✅ Use the default debug keystore for both build types (so you don't need keystore.jks)
+    // ✅ Updated signingConfigs to use your custom keystore
     signingConfigs {
-        // default debug signing exists at ~/.android/debug.keystore
-        getByName("debug")
+        getByName("debug") {
+            // Keep debug config as is, or update to use your keystore for consistency
+            storeFile = file(keystoreProperties.getProperty("storeFile"))
+            storePassword = keystoreProperties.getProperty("storePassword")
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+        }
+        
         create("release") {
-            storeFile = file(System.getProperty("user.home") + "/.android/debug.keystore")
-            storePassword = "android"
-            keyAlias = "AndroidDebugKey"
-            keyPassword = "android"
+            storeFile = file(keystoreProperties.getProperty("storeFile"))
+            storePassword = keystoreProperties.getProperty("storePassword")
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
         }
     }
 
@@ -89,5 +105,3 @@ flutter {
 tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.add("-Xlint:-options")
 }
-
-

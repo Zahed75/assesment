@@ -1,5 +1,7 @@
 // lib/app/screens/splash_screen.dart
+import 'package:assesment/navigation_menu.dart';
 import 'package:assesment/utils/constants/token_storage.dart';
+import 'package:assesment/utils/helpers/update_checker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -21,9 +23,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     _checkAuthAndNavigate();
   }
 
-  // lib/app/screens/splash_screen.dart - UPDATE SPLASH LOGIC
+  // COMBINE BOTH INITIALIZATION AND AUTH CHECK
   Future<void> _checkAuthAndNavigate() async {
     final storageService = ref.read(storageServiceProvider);
+
+    // Check for updates first (PASS THE CONTEXT)
+    await UpdateChecker.checkForUpdates(context: context);
 
     // Add a proper delay for splash screen
     await Future.delayed(const Duration(milliseconds: 1500));

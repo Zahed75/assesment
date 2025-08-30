@@ -51,6 +51,7 @@ dependencies:
   flutter_riverpod: ^2.6.1
   email_validator: ^3.0.0
   jwt_decoder: ^2.0.1
+  app_installer_plus: ^1.0.0
 
 
 
