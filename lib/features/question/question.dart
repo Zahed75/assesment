@@ -127,9 +127,6 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
     });
   }
 
-  // In your _submitSurvey method, add validation before submitting
-
-  // In your QuestionScreen class, replace the entire _submitSurvey method with this:
   Future<void> _submitSurvey() async {
     if (isSubmitting) return;
 
@@ -300,8 +297,6 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
     }
   }
 
-  // In your QuestionScreen's _navigateToResultScreen method
-  // In your QuestionScreen's _navigateToResultScreen method
   void _navigateToResultScreen(SurveySubmitResponseModel response) {
     if (response.responseId == null || response.responseId == 0) {
       print('❌ Invalid responseId: ${response.responseId}');
@@ -334,10 +329,13 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
     int questionCount,
     bool isExpanded,
   ) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -352,19 +350,31 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: Colors.blue.shade50,
+            color: theme.colorScheme.primary.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(Icons.category, color: Colors.blue.shade700, size: 20),
+          child: Icon(
+            Icons.category,
+            color: theme.colorScheme.primary,
+            size: 20,
+          ),
         ),
         title: Text(
           category,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+            color: theme.textTheme.bodyMedium?.color,
+          ),
         ),
-        subtitle: Text("$questionCount questions"),
+        subtitle: Text(
+          "$questionCount questions",
+          style: TextStyle(color: theme.textTheme.bodySmall?.color),
+        ),
         trailing: Icon(
           isExpanded ? Iconsax.arrow_up_2 : Iconsax.arrow_down_1,
           size: 20,
+          color: theme.textTheme.bodySmall?.color,
         ),
         onTap: () => _toggleCategory(category),
       ),
@@ -376,6 +386,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
     int serialNumber,
     String category,
   ) {
+    final theme = Theme.of(context);
     final id = question['id'];
     final type = question['type'];
     final text = question['text'];
@@ -385,7 +396,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -408,16 +419,16 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
                   width: 30,
                   height: 30,
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade100,
+                    color: theme.colorScheme.primary.withOpacity(0.2),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
                     child: Text(
                       '$serialNumber',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
-                        color: Colors.blue,
+                        color: theme.colorScheme.primary,
                       ),
                     ),
                   ),
@@ -429,9 +440,10 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
                     children: [
                       Text(
                         text,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
+                          color: theme.textTheme.bodyMedium?.color,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -444,13 +456,13 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.red.shade50,
+                                color: Colors.red.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 "Required",
                                 style: TextStyle(
-                                  color: Colors.red.shade700,
+                                  color: Colors.red,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -464,13 +476,13 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.green.shade50,
+                                color: Colors.green.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 "$marks marks",
                                 style: TextStyle(
-                                  color: Colors.green.shade700,
+                                  color: Colors.green,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -521,6 +533,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
   }
 
   Widget _buildYesNoInput(Map<String, dynamic> question, int id) {
+    final theme = Theme.of(context);
     final choices = question['choices'] as List;
     final currentAnswer = ref.watch(answersProvider)[id];
 
@@ -538,10 +551,10 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
               style: FilledButton.styleFrom(
                 backgroundColor: currentAnswer == choices[0]['id']
                     ? Colors.green
-                    : null,
+                    : theme.colorScheme.surface,
                 foregroundColor: currentAnswer == choices[0]['id']
                     ? Colors.white
-                    : null,
+                    : theme.textTheme.bodyMedium?.color,
               ),
               child: Text(choices[0]['text']),
             ),
@@ -560,10 +573,10 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
               style: FilledButton.styleFrom(
                 backgroundColor: currentAnswer == choices[1]['id']
                     ? Colors.red
-                    : null,
+                    : theme.colorScheme.surface,
                 foregroundColor: currentAnswer == choices[1]['id']
                     ? Colors.white
-                    : null,
+                    : theme.textTheme.bodyMedium?.color,
               ),
               child: Text(choices[1]['text']),
             ),
@@ -574,10 +587,14 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
   }
 
   Widget _buildChoiceInput(Map<String, dynamic> question, int id) {
+    final theme = Theme.of(context);
     return Column(
       children: (question['choices'] as List).map<Widget>((choice) {
         return RadioListTile(
-          title: Text(choice['text']),
+          title: Text(
+            choice['text'],
+            style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+          ),
           value: choice['id'],
           groupValue: ref.watch(answersProvider)[id],
           onChanged: (val) {
@@ -591,10 +608,14 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
   }
 
   Widget _buildMultipleScoringInput(Map<String, dynamic> question, int id) {
+    final theme = Theme.of(context);
     return Column(
       children: (question['choices'] as List).map<Widget>((choice) {
         return RadioListTile(
-          title: Text('${choice['text']} (${choice['marks']} marks)'),
+          title: Text(
+            '${choice['text']} (${choice['marks']} marks)',
+            style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+          ),
           value: choice['id'],
           groupValue: ref.watch(answersProvider)[id],
           onChanged: (val) {
@@ -608,6 +629,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
   }
 
   Widget _buildImageInput(int id) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Row(
@@ -618,8 +640,8 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
                 icon: const Icon(Iconsax.camera, size: 18),
                 label: const Text('Take Photo'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue.shade50,
-                  foregroundColor: Colors.blue.shade700,
+                  backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                  foregroundColor: theme.colorScheme.primary,
                 ),
               ),
             ),
@@ -630,8 +652,8 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
                 icon: const Icon(Iconsax.gallery, size: 18),
                 label: const Text('Upload'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green.shade50,
-                  foregroundColor: Colors.green.shade700,
+                  backgroundColor: Colors.green.withOpacity(0.1),
+                  foregroundColor: Colors.green,
                 ),
               ),
             ),
@@ -642,7 +664,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
             margin: const EdgeInsets.only(top: 8),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.green.shade50,
+              color: Colors.green.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -663,6 +685,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
   }
 
   Widget _buildLocationInput(int id) {
+    final theme = Theme.of(context);
     final detectedLocation = ref.watch(detectedLocationProvider)[id];
     final isLocationDetected = detectedLocation != null;
 
@@ -672,6 +695,10 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
           onPressed: () => detectLocation(id),
           icon: const Icon(Iconsax.location, size: 18),
           label: const Text('Detect Current Location'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface,
+            foregroundColor: theme.textTheme.bodyMedium?.color,
+          ),
         ),
         const SizedBox(height: 12),
         // Show detected location if available
@@ -680,18 +707,22 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
             margin: const EdgeInsets.only(top: 8),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50,
+              color: theme.colorScheme.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: [
-                const Icon(Iconsax.location_tick, size: 16, color: Colors.blue),
+                Icon(
+                  Iconsax.location_tick,
+                  size: 16,
+                  color: theme.colorScheme.primary,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     "Lat: ${detectedLocation["latitude"]!.toStringAsFixed(6)}, "
                     "Lng: ${detectedLocation["longitude"]!.toStringAsFixed(6)}",
-                    style: const TextStyle(color: Colors.blue),
+                    style: TextStyle(color: theme.colorScheme.primary),
                   ),
                 ),
               ],
@@ -702,6 +733,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
   }
 
   Widget _buildTextInput(int id) {
+    final theme = Theme.of(context);
     return TextField(
       maxLines: 3,
       onChanged: (val) {
@@ -709,16 +741,19 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
           return {...state, id: val};
         });
       },
+      style: TextStyle(color: theme.textTheme.bodyMedium?.color),
       decoration: InputDecoration(
         hintText: "Type your response here...",
+        hintStyle: TextStyle(color: theme.textTheme.bodySmall?.color),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         filled: true,
-        fillColor: Colors.grey.shade50,
+        fillColor: theme.colorScheme.surface,
       ),
     );
   }
 
   Widget _buildLinearInput(Map<String, dynamic> question, int id) {
+    final theme = Theme.of(context);
     final minValue = question['min_value'] ?? 0;
     final maxValue = question['max_value'] ?? 10;
     final currentValue = ref.watch(answersProvider)[id] ?? minValue;
@@ -738,9 +773,28 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
         ),
         Text(
           "Selected: $currentValue",
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: theme.textTheme.bodyMedium?.color,
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildInfoChip(IconData icon, String text) {
+    final theme = Theme.of(context);
+    return Chip(
+      avatar: Icon(icon, size: 16, color: theme.colorScheme.primary),
+      label: Text(
+        text,
+        style: TextStyle(
+          fontSize: 12,
+          color: theme.textTheme.bodyMedium?.color,
+        ),
+      ),
+      backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+      labelPadding: const EdgeInsets.symmetric(horizontal: 4),
     );
   }
 
@@ -748,8 +802,9 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
   Widget build(BuildContext context) {
     final questions = widget.surveyData['questions'] as List;
     final expandedCategories = ref.watch(expandedCategoriesProvider);
+    final theme = Theme.of(context);
 
-    // Group questions by category (you might need to adjust this based on your data structure)
+    // Group questions by category
     final Map<String, List<Map<String, dynamic>>> categorizedQuestions = {};
 
     for (var question in questions) {
@@ -761,23 +816,15 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Iconsax.arrow_left_2),
+          icon: Icon(Iconsax.arrow_left_2, color: theme.iconTheme.color),
           onPressed: () => {
-            // Use GoRouter's pop() to handle back navigation
             if (GoRouter.of(context).canPop())
-              {
-                GoRouter.of(context).pop(), // This pops the current route
-              }
+              {GoRouter.of(context).pop()}
             else
-              {
-                // If there's no route to pop, go to a default route (e.g., home)
-                GoRouter.of(
-                  context,
-                ).go(Routes.home), // Go to the home route or a fallback
-              },
+              {GoRouter.of(context).go(Routes.home)},
           },
         ),
         title: Column(
@@ -785,17 +832,24 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
           children: [
             Text(
               widget.surveyData['title'] ?? 'Survey',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: theme.textTheme.bodyMedium?.color,
+              ),
             ),
             Text(
               'Site: ${widget.siteCode}',
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 12,
+                color: theme.textTheme.bodySmall?.color,
+              ),
             ),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Iconsax.info_circle),
+            icon: Icon(Iconsax.info_circle, color: theme.iconTheme.color),
             onPressed: () {
               UAlert.show(
                 title: "Survey Info",
@@ -817,7 +871,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: theme.cardColor,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
@@ -832,9 +886,10 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
                 children: [
                   Text(
                     widget.surveyData['title'] ?? 'Survey',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: theme.textTheme.bodyMedium?.color,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -842,7 +897,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
                     Text(
                       widget.surveyData['description']!,
                       style: TextStyle(
-                        color: Colors.grey.shade600,
+                        color: theme.textTheme.bodySmall?.color,
                         fontSize: 14,
                       ),
                     ),
@@ -897,23 +952,22 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
                       ],
                     );
                   }),
-                  const SizedBox(height: 80), // Space for submit button
+                  const SizedBox(height: 80),
                 ],
               ),
             ),
           ],
         ),
       ),
-      // FLOATING ACTION BUTTON FOR SUBMIT
       floatingActionButton: Container(
         margin: const EdgeInsets.only(bottom: 16),
         child: FloatingActionButton.extended(
           onPressed: isSubmitting ? null : _submitSurvey,
-          backgroundColor: Colors.blue,
-          foregroundColor: Colors.white,
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: theme.colorScheme.onPrimary,
           icon: isSubmitting
-              ? const CircularProgressIndicator(
-                  color: Colors.white,
+              ? CircularProgressIndicator(
+                  color: theme.colorScheme.onPrimary,
                   strokeWidth: 2,
                 )
               : const Icon(Iconsax.send_2),
@@ -921,15 +975,6 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-    );
-  }
-
-  Widget _buildInfoChip(IconData icon, String text) {
-    return Chip(
-      avatar: Icon(icon, size: 16),
-      label: Text(text, style: const TextStyle(fontSize: 12)),
-      backgroundColor: Colors.blue.shade50,
-      labelPadding: const EdgeInsets.symmetric(horizontal: 4),
     );
   }
 }
