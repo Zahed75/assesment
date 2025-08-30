@@ -126,22 +126,26 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return resultState.when(
-      loading: () => Scaffold(
+    return Scaffold(
+      backgroundColor:
+          theme.scaffoldBackgroundColor, // FIX: Changed from transparent
+      appBar: AppBar(
+        title: const Text('Survey Result'),
         backgroundColor: Colors.transparent,
-        body: Center(
-          child: CircularProgressIndicator(color: theme.colorScheme.primary),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            // Navigate back to home screen
+            context.goNamed(Routes.home);
+          },
         ),
       ),
-      // In your result_screen.dart error handling
-      error: (error, stackTrace) => Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text('Result'),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
+      body: resultState.when(
+        loading: () => Center(
+          child: CircularProgressIndicator(color: theme.colorScheme.primary),
         ),
-        body: Center(
+        error: (error, stackTrace) => Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -160,7 +164,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
               if (error.toString().contains('token'))
                 TextButton(
                   onPressed: () {
-                    // Navigate to login screen
                     context.goNamed(Routes.signIn);
                   },
                   child: const Text('Go to Login'),
@@ -168,34 +171,34 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
             ],
           ),
         ),
-      ),
-      data: (result) {
-        final processedData = _processSurveyData(result);
+        data: (result) {
+          final processedData = _processSurveyData(result);
 
-        final totalScore =
-            (processedData['overall']?['obtainedMarks'] as num?)?.toDouble() ??
-            0;
-        final maxScore =
-            (processedData['overall']?['totalMarks'] as num?)?.toDouble() ?? 0;
-        final percent = maxScore == 0 ? 0.0 : totalScore / maxScore;
-        final resultPercentLabel = '${(percent * 100).toStringAsFixed(1)}%';
+          final totalScore =
+              (processedData['overall']?['obtainedMarks'] as num?)
+                  ?.toDouble() ??
+              0;
+          final maxScore =
+              (processedData['overall']?['totalMarks'] as num?)?.toDouble() ??
+              0;
+          final percent = maxScore == 0 ? 0.0 : totalScore / maxScore;
+          final resultPercentLabel = '${(percent * 100).toStringAsFixed(1)}%';
 
-        final String siteCode = (processedData['siteCode'] ?? 'N/A').toString();
-        final String? siteName = processedData['siteName']?.toString();
-        final DateTime timestamp = _safeParseDate(processedData['timestamp']);
-        final String feedback =
-            processedData['feedback']?.toString() ?? 'No feedback submitted.';
+          final String siteCode = (processedData['siteCode'] ?? 'N/A')
+              .toString();
+          final String? siteName = processedData['siteName']?.toString();
+          final DateTime timestamp = _safeParseDate(processedData['timestamp']);
+          final String feedback =
+              processedData['feedback']?.toString() ?? 'No feedback submitted.';
 
-        final List<Map<String, dynamic>> categories =
-            (processedData['categories'] as List?)
-                ?.cast<Map<String, dynamic>>() ??
-            [];
+          final List<Map<String, dynamic>> categories =
+              (processedData['categories'] as List?)
+                  ?.cast<Map<String, dynamic>>() ??
+              [];
 
-        return DefaultTabController(
-          length: 2,
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Column(
+          return DefaultTabController(
+            length: 2,
+            child: Column(
               children: [
                 // Fixed Header
                 ResultHeader(
@@ -211,7 +214,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 // Fixed Tab Bar
                 Container(
                   decoration: BoxDecoration(
-                    color: theme.cardColor.withOpacity(0.9),
+                    color: theme.cardColor,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(20),
                       topRight: Radius.circular(20),
@@ -232,15 +235,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 // Scrollable Content
                 Expanded(
                   child: Container(
-                    decoration: BoxDecoration(
-                      color: theme.cardColor.withOpacity(0.8),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20),
-                      ),
-                    ),
-                    child: // In the TabBarView section of result_screen.dart
-                    TabBarView(
+                    color: theme.cardColor, // FIX: Changed from transparent
+                    child: TabBarView(
                       children: [
                         // SUMMARY TAB
                         SummaryTab(
@@ -250,8 +246,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                           qType: _qType,
                           qText: _qText,
                           qAnswer: _qAnswer,
-                          qObtainedMarks: _qObtainedMarks, // Add this
-                          qMaxMarks: _qMaxMarks, // Add this
+                          qObtainedMarks: _qObtainedMarks,
+                          qMaxMarks: _qMaxMarks,
                         ),
 
                         // ALL QUESTIONS TAB
@@ -267,9 +263,9 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 ),
               ],
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
